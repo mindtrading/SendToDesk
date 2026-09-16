@@ -1,0 +1,9 @@
+Open install-guide.html for setup help.
+
+If Windows says "Windows protected your PC":
+  1. Click More info
+  2. Click Run anyway
+
+If a firewall window appears:
+  Tick Private networks
+  Click Allow access

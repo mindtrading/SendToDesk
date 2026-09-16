@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Install SendToDesk on Windows</title>
+  <meta name="description" content="Step-by-step Windows install guide for SendToDesk Desktop: unzip, SmartScreen, and firewall." />
+  <link rel="icon" href="../assets/img/app_logo.png" type="image/png" />
+  <link rel="canonical" href="/install/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <a class="brand" href="../">
+        <img src="../assets/img/app_logo.png" alt="SendToDesk" width="36" height="36" />
+        SendToDesk
+      </a>
+      <button class="menu-btn" type="button" aria-label="Menu">Menu</button>
+      <nav class="nav">
+        <a href="../#features">Features</a>
+        <a href="../#download">Download</a>
+        <a href="./" aria-current="page">Install guide</a>
+        <a href="../support/">Support</a>
+        <a class="nav-cta" href="../#download">Download now</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap legal guide">
+    <p class="kicker">Windows</p>
+    <h1>Install SendToDesk Desktop</h1>
+    <p class="meta">Follow these steps once. After this, just open the app and pair your phone.</p>
+
+    <article class="guide-step">
+      <h2><span class="step-num">1</span> Unzip the download</h2>
+      <p>Right-click the zip file → <strong>Extract All</strong> → Extract. Open the new folder. Do not run the app from inside the zip.</p>
+      <div class="callout callout-warn">Keep the whole folder together. Copying only <strong>SendToDesk.exe</strong> will not work.</div>
+    </article>
+
+    <article class="guide-step">
+      <h2><span class="step-num">2</span> Open SendToDesk.exe</h2>
+      <p>Double-click <strong>SendToDesk.exe</strong>.</p>
+      <figure class="shot">
+        <img src="images/open-exe.png" alt="File Explorer showing SendToDesk.exe in the extracted folder" width="1376" height="768" />
+        <figcaption>Click SendToDesk.exe in the extracted folder.</figcaption>
+      </figure>
+    </article>
+
+    <article class="guide-step">
+      <h2><span class="step-num">3</span> If you see “Windows protected your PC”</h2>
+      <p>This is normal the first time. The window only shows <strong>Don’t run</strong>. You must click the small link first.</p>
+      <figure class="shot">
+        <img src="images/smartscreen-more-info.png" alt="Blue Windows SmartScreen window with More info highlighted" width="1376" height="768" />
+        <figcaption>Click <strong>More info</strong> on the left. Do not click Don’t run.</figcaption>
+      </figure>
+      <p>A new button appears. Click <strong>Run anyway</strong>.</p>
+      <figure class="shot">
+        <img src="images/smartscreen-run-anyway.png" alt="SmartScreen window after More info, with Run anyway highlighted" width="1376" height="768" />
+        <figcaption>Click <strong>Run anyway</strong> to open SendToDesk.</figcaption>
+      </figure>
+      <div class="callout callout-ok">This warning appears because the Windows file is new. Use it only if you downloaded from the official SendToDesk website.</div>
+    </article>
+
+    <article class="guide-step">
+      <h2><span class="step-num">4</span> Allow the firewall</h2>
+      <p>The first time the app opens, Windows may ask about the firewall. Your phone cannot find the PC if you click Cancel.</p>
+      <figure class="shot">
+        <img src="images/firewall-allow.png" alt="Windows Firewall dialog with Private networks checked and Allow access highlighted" width="1376" height="768" />
+        <figcaption>Tick <strong>Private networks</strong>, then click <strong>Allow access</strong>.</figcaption>
+      </figure>
+      <div class="callout callout-warn">Leave <strong>Public networks</strong> unticked. If you already clicked Cancel, see the tip below.</div>
+    </article>
+
+    <article class="guide-step">
+      <h2><span class="step-num">5</span> Pair your phone</h2>
+      <p>Keep SendToDesk Desktop open. Put the phone and PC on the same Wi‑Fi. In the Android app, connect with Nearby, QR, or the 6-digit code.</p>
+    </article>
+
+    <h2>If you clicked Cancel by mistake</h2>
+    <p>Open <strong>Windows Security</strong> → Firewall &amp; network protection → <strong>Allow an app through firewall</strong> → find <strong>SendToDesk</strong> → tick <strong>Private</strong> → OK. Then open the app again.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div>
+        <a class="brand brand-light" href="../">
+          <img src="../assets/img/app_logo.png" alt="SendToDesk" width="36" height="36" />
+          SendToDesk
+        </a>
+        <p>Phone to Windows PC over local Wi‑Fi. Files never go to a SendToDesk cloud.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <a href="../#download">Download Windows</a>
+        <a href="./">Install guide</a>
+        <a data-dl="play" href="https://play.google.com/store/apps/details?id=com.docs.scan.sendtodesk">Google Play</a>
+      </div>
+      <div>
+        <h4>Help</h4>
+        <a href="../support/">Support</a>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <a href="../privacy/">Privacy Policy</a>
+        <a href="../terms/">Terms</a>
+      </div>
+    </div>
+    <div class="wrap footer-bar">
+      <span>© 2026 SendToDesk</span>
+      <span>Static site · host anywhere</span>
+    </div>
+  </footer>
+  <script src="../assets/js/site.js"></script>
+</body>
+</html>

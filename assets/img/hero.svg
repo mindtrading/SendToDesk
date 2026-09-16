@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" fill="none" role="img" aria-labelledby="heroTitle">
+  <title id="heroTitle">Phone sending a file to a Windows PC</title>
+  <rect width="640" height="480" rx="24" fill="#0c1614"/>
+  <circle cx="520" cy="80" r="120" fill="#0f766e" opacity="0.18"/>
+  <circle cx="80" cy="400" r="90" fill="#14b8a6" opacity="0.12"/>
+  <!-- laptop -->
+  <rect x="168" y="108" width="360" height="228" rx="14" fill="#1a2422" stroke="#2a3d38" stroke-width="2"/>
+  <rect x="184" y="124" width="328" height="188" rx="6" fill="#0b1211"/>
+  <rect x="204" y="148" width="180" height="12" rx="3" fill="#134e4a"/>
+  <rect x="204" y="172" width="248" height="8" rx="2" fill="#1e3a37"/>
+  <rect x="204" y="188" width="220" height="8" rx="2" fill="#1e3a37"/>
+  <rect x="204" y="216" width="120" height="56" rx="8" fill="#115e59"/>
+  <rect x="336" y="216" width="120" height="56" rx="8" fill="#0f766e"/>
+  <rect x="148" y="336" width="400" height="16" rx="3" fill="#243330"/>
+  <rect x="248" y="352" width="200" height="8" rx="2" fill="#1a2422"/>
+  <!-- connection -->
+  <path d="M132 250C132 250 160 230 184 236" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="5 6"/>
+  <!-- phone -->
+  <rect x="48" y="168" width="112" height="208" rx="16" fill="#111c1a" stroke="#2dd4bf" stroke-width="2"/>
+  <rect x="58" y="186" width="92" height="148" rx="6" fill="#0b1211"/>
+  <circle cx="104" cy="352" r="8" stroke="#2a3d38" stroke-width="2"/>
+  <rect x="70" y="202" width="68" height="8" rx="2" fill="#0f766e"/>
+  <rect x="70" y="220" width="52" height="6" rx="2" fill="#1e3a37"/>
+  <rect x="70" y="248" width="68" height="40" rx="6" fill="#14b8a6"/>
+</svg>

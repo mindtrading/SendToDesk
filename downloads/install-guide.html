@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Install SendToDesk on Windows</title>
+  <style>
+    :root { --teal:#0f766e; --text:#10211e; --muted:#4b605c; --line:#dce8e5; --bg:#f4f7f6; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Segoe UI, system-ui, sans-serif; color:var(--text); background:#fff; line-height:1.55; }
+    .wrap { width:min(820px, calc(100% - 32px)); margin:0 auto; padding:28px 0 64px; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:700; font-size:18px; margin:0 0 24px; }
+    .brand img { width:36px; height:36px; border-radius:10px; }
+    h1 { font-size:32px; line-height:1.15; margin:0 0 8px; }
+    .meta { color:var(--muted); margin:0 0 36px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+    h2 { display:flex; align-items:center; gap:12px; font-size:20px; margin:0 0 10px; }
+    .n { flex:0 0 32px; height:32px; border-radius:8px; background:#ecfdf8; color:var(--teal); display:grid; place-items:center; font-size:13px; font-weight:800; }
+    .step { margin:0 0 40px; }
+    p { color:var(--muted); margin:0 0 14px; }
+    strong { color:var(--text); }
+    figure { margin:0 0 14px; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+    img { max-width:100%; display:block; }
+    figcaption { padding:10px 14px; background:var(--bg); font-size:14px; font-weight:600; color:var(--muted); }
+    .ok, .warn { border-radius:10px; padding:12px 14px; font-size:14px; margin:0 0 8px; }
+    .ok { background:#ecfdf8; border:1px solid #99f6e4; }
+    .warn { background:#fffbeb; border:1px solid #fde68a; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <img src="install-guide-images/app_logo.png" alt="SendToDesk" width="36" height="36" />
+      SendToDesk
+    </div>
+    <h1>Install SendToDesk Desktop</h1>
+    <p class="meta">English guide. Do these steps once, then pair your phone.</p>
+
+    <div class="step">
+      <h2><span class="n">1</span> Unzip the download</h2>
+      <p>Right-click the zip → <strong>Extract All</strong> → Extract. Open the new folder. Do not run the app from inside the zip.</p>
+      <div class="warn">Keep the whole folder. Copying only <strong>SendToDesk.exe</strong> will not work.</div>
+    </div>
+
+    <div class="step">
+      <h2><span class="n">2</span> Open SendToDesk.exe</h2>
+      <p>Double-click <strong>SendToDesk.exe</strong>.</p>
+      <figure>
+        <img src="install-guide-images/open-exe.png" alt="Folder with SendToDesk.exe" />
+        <figcaption>Click SendToDesk.exe in the extracted folder.</figcaption>
+      </figure>
+    </div>
+
+    <div class="step">
+      <h2><span class="n">3</span> If you see “Windows protected your PC”</h2>
+      <p>This is normal. Click the small <strong>More info</strong> link first. Do not click Don’t run.</p>
+      <figure>
+        <img src="install-guide-images/smartscreen-more-info.png" alt="SmartScreen More info" />
+        <figcaption>Click <strong>More info</strong>.</figcaption>
+      </figure>
+      <p>Then click <strong>Run anyway</strong>.</p>
+      <figure>
+        <img src="install-guide-images/smartscreen-run-anyway.png" alt="SmartScreen Run anyway" />
+        <figcaption>Click <strong>Run anyway</strong>.</figcaption>
+      </figure>
+      <div class="ok">This warning appears because the app is new. Use it only if this zip came from the official SendToDesk website.</div>
+    </div>
+
+    <div class="step">
+      <h2><span class="n">4</span> Allow the firewall</h2>
+      <p>The first time the app opens, Windows may show a firewall alert. Click Cancel and your phone cannot find this PC.</p>
+      <figure>
+        <img src="install-guide-images/firewall-allow.png" alt="Firewall Allow access" />
+        <figcaption>Tick <strong>Private networks</strong>, then click <strong>Allow access</strong>.</figcaption>
+      </figure>
+      <div class="warn">Leave Public networks unticked.</div>
+    </div>
+
+    <div class="step">
+      <h2><span class="n">5</span> Pair your phone</h2>
+      <p>Keep this app open. Use the same Wi‑Fi on phone and PC. In the Android app, connect with Nearby, QR, or the 6-digit code.</p>
+    </div>
+
+    <h2>If you clicked Cancel by mistake</h2>
+    <p>Windows Security → Firewall &amp; network protection → Allow an app through firewall → SendToDesk → tick Private → OK.</p>
+  </div>
+</body>
+</html>
