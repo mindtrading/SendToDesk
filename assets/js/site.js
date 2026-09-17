@@ -2,13 +2,16 @@
   var cfg = {
     version: "1.0.0",
     email: "hello@sendtodesk.app",
-    windows: "downloads/SendToDesk-1.0.0-windows.zip",
+    windows: "https://pub-39a92e5168a84fd6a714627aef76b5f1.r2.dev/SendToDesk_1.0.zip",
     play: "https://play.google.com/store/apps/details?id=com.docs.scan.sendtodesk",
   };
 
   document.querySelectorAll("[data-dl]").forEach(function (el) {
     var kind = el.getAttribute("data-dl");
-    if (kind === "windows") el.setAttribute("href", rootHref(cfg.windows));
+    if (kind === "windows") {
+      el.setAttribute("href", rootHref(cfg.windows));
+      el.setAttribute("download", "SendToDesk-" + cfg.version + "-windows.zip");
+    }
     if (kind === "play") el.setAttribute("href", cfg.play);
   });
 
@@ -33,6 +36,7 @@
   }
 
   function rootHref(path) {
+    if (/^https?:\/\//i.test(path)) return path;
     var here = location.pathname;
     if (here.indexOf("/privacy") !== -1 || here.indexOf("/terms") !== -1 || here.indexOf("/support") !== -1 || here.indexOf("/install") !== -1) {
       return "../" + path;
