@@ -1,7 +1,7 @@
 (function () {
   var cfg = {
     version: "1.0.0",
-    email: "hello@sendtodesk.app",
+    email: "mindtradingapp@gmail.com",
     windows: "https://pub-39a92e5168a84fd6a714627aef76b5f1.r2.dev/SendToDesk_1.0.zip",
     play: "https://play.google.com/store/apps/details?id=com.docs.scan.sendtodesk",
   };
