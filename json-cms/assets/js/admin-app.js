@@ -217,7 +217,7 @@
     ];
     for (const name of samples) {
       try {
-        const res = await fetch("/samples/" + name);
+        const res = await fetch("samples/" + name);
         if (!res.ok) throw new Error("Missing sample " + name);
         const data = await res.json();
         try {

@@ -1,0 +1,12 @@
+# Used by Cloudflare Pages (SendToDesk + JSON CMS under /json-cms/)
+name = "sendtodesk"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "."
+
+[[r2_buckets]]
+binding = "CONTENT"
+bucket_name = "json-cms-content"
+preview_bucket_name = "json-cms-content-preview"
+
+# Pages → Settings → Environment variables:
+#   ADMIN_USER, ADMIN_PASSWORD, SESSION_SECRET

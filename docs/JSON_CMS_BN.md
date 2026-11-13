@@ -1,19 +1,14 @@
-# JSON CMS — SendToDesk এর সাথে ব্যবহার
+# JSON CMS — SendToDesk
 
-মার্কেটিং সাইট স্ট্যাটিক থাকবে। কনটেন্ট/সেটিংস আসবে JSON CMS থেকে।
+লাইভ অ্যাডমিন: [https://sendtodesk.pages.dev/json-cms/](https://sendtodesk.pages.dev/json-cms/)
 
-1. `json-cms/` আলাদা Cloudflare Pages প্রজেক্ট হিসেবে ডিপ্লয় করুন (গাইড: [json-cms/README.md](../json-cms/README.md))
-2. Seed samples চালান
-3. সাইটের JS-এ CMS URL দিন, উদাহরণ:
+বিস্তারিত সেটআপ: [json-cms/README.md](../json-cms/README.md)
+
+পাবলিক JSON উদাহরণ:
 
 ```js
-const CMS = "https://YOUR-CMS.pages.dev";
-
-async function loadSettings() {
-  const res = await fetch(`${CMS}/content/site-settings.json`);
-  if (!res.ok) return null;
-  return res.json();
-}
+const CMS = "https://sendtodesk.pages.dev";
+const settings = await (await fetch(`${CMS}/content/site-settings.json`)).json();
 ```
 
-ব্লগ পেজ চাইলে একইভাবে `/content/blog.json` ফেচ করে রেন্ডার করুন।
+Cloudflare-এ একবার লাগবে: R2 binding `CONTENT` + `ADMIN_USER` / `ADMIN_PASSWORD` / `SESSION_SECRET`।
