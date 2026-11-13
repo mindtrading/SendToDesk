@@ -493,14 +493,50 @@
     }
   }
 
+  function setSidebarOpen(open) {
+    const shell = $("#app-view");
+    const btn = $("#btn-sidebar");
+    const backdrop = $("#sidebar-backdrop");
+    if (!shell) return;
+    shell.classList.toggle("sidebar-open", !!open);
+    if (btn) {
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.textContent = open ? "Close" : "Menu";
+    }
+    if (backdrop) backdrop.hidden = !open;
+  }
+
+  function bindSidebarUi() {
+    const btn = $("#btn-sidebar");
+    const backdrop = $("#sidebar-backdrop");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        const shell = $("#app-view");
+        setSidebarOpen(!(shell && shell.classList.contains("sidebar-open")));
+      });
+    }
+    if (backdrop) {
+      backdrop.addEventListener("click", () => setSidebarOpen(false));
+    }
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 900) setSidebarOpen(false);
+    });
+  }
+
   function bindMediaUi() {
     const navContent = $("#nav-content");
     const navMedia = $("#nav-media");
     if (navContent) {
-      navContent.addEventListener("click", () => setStudioSection("content"));
+      navContent.addEventListener("click", () => {
+        setStudioSection("content");
+        setSidebarOpen(false);
+      });
     }
     if (navMedia) {
-      navMedia.addEventListener("click", () => setStudioSection("media"));
+      navMedia.addEventListener("click", () => {
+        setStudioSection("media");
+        setSidebarOpen(false);
+      });
     }
     const refresh = $("#media-refresh");
     if (refresh) refresh.addEventListener("click", () => refreshMediaLibrary().catch((e) => toast(e.message, "error")));
@@ -813,7 +849,10 @@
       btn.type = "button";
       btn.className = "file-item" + (f.name === state.currentName ? " active" : "");
       btn.innerHTML = `<span class="file-name">${escapeHtml(prettyName(f.name))}</span><span class="file-meta">${escapeHtml(f.name)}</span>`;
-      btn.addEventListener("click", () => openFile(f.name));
+      btn.addEventListener("click", () => {
+        setSidebarOpen(false);
+        openFile(f.name);
+      });
       list.appendChild(btn);
     });
   }
@@ -1339,6 +1378,7 @@
   initTheme();
   bindSetupUi();
   bindMediaUi();
+  bindSidebarUi();
   bindConfirmUi();
   checkAuth();
 })();
