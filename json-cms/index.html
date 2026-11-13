@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=34" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=35" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -210,6 +210,12 @@
 
   <div id="app-view" class="app-shell" hidden>
     <aside class="sidebar" id="studio-sidebar">
+      <div class="side-chrome" aria-hidden="true">
+        <span class="login-dot login-dot-red"></span>
+        <span class="login-dot login-dot-amber"></span>
+        <span class="login-dot login-dot-green"></span>
+        <code class="side-path">~/corepanel</code>
+      </div>
       <div class="side-head">
         <a class="side-brand" href="./" aria-label="CorePanel">
           <img
@@ -225,19 +231,21 @@
         </a>
       </div>
       <nav class="side-nav" aria-label="Studio sections">
-        <button type="button" class="side-nav-btn is-active" id="nav-content" data-studio="content">Content</button>
-        <button type="button" class="side-nav-btn" id="nav-media" data-studio="media">Media</button>
+        <button type="button" class="side-nav-btn is-active" id="nav-content" data-studio="content"><span class="nav-prefix">01</span> Content</button>
+        <button type="button" class="side-nav-btn" id="nav-media" data-studio="media"><span class="nav-prefix">02</span> Media</button>
       </nav>
       <div id="content-side" class="side-section">
+        <p class="side-section-label"><span>//</span> explorer</p>
         <div class="side-actions">
-          <button type="button" class="btn btn-secondary btn-sm" id="btn-new">New content</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-new">New</button>
           <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh">Refresh</button>
-          <button type="button" class="btn btn-ghost btn-sm" id="btn-seed">Load demos</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-seed">Demos</button>
         </div>
         <div id="file-list" class="file-list"></div>
       </div>
       <div id="media-side" class="side-section" hidden>
-        <p class="side-hint">Upload images to R2. Copy links into posts and settings.</p>
+        <p class="side-section-label"><span>//</span> storage</p>
+        <p class="side-hint">Upload to R2. Copy URLs into posts and settings.</p>
         <div class="r2-status" id="r2-status">
           <span class="r2-dot" id="r2-dot"></span>
           <span id="r2-status-text">Checking R2…</span>
@@ -270,7 +278,10 @@
           <button type="button" class="sidebar-toggle" id="btn-sidebar" aria-label="Toggle sidebar" aria-expanded="true" title="Toggle sidebar">
             <span class="hb-bars" aria-hidden="true"></span>
           </button>
-          <h1 id="current-file">CorePanel</h1>
+          <div class="topbar-path">
+            <span class="topbar-prefix" aria-hidden="true">~/workspace/</span>
+            <h1 id="current-file">CorePanel</h1>
+          </div>
           <span id="dirty-dot" class="dirty-dot" hidden title="Unsaved changes"></span>
         </div>
         <div class="topbar-actions">
@@ -312,20 +323,23 @@
 
       <div class="editor" id="content-editor">
         <div id="editor-empty" class="empty-state">
-          <h2>Pick content to edit</h2>
-          <p>Choose an item on the left, or click <strong>Load demos</strong> to try site settings, blog HTML, ads, FAQ, team, and more.</p>
+          <p class="empty-kicker"><span>//</span> workspace</p>
+          <h2>No file open</h2>
+          <p>Select a source from the explorer, or run <strong>Demos</strong> to seed sample JSON for pages, blog, ads, FAQ, and team.</p>
+          <pre class="empty-code" aria-hidden="true">open content/*.json
+# ready when you are</pre>
         </div>
 
         <div id="editor-panel" hidden>
           <div class="editor-toolbar">
             <div class="tabs">
-              <button type="button" class="tab active" id="tab-form">Edit content</button>
-              <button type="button" class="tab" id="tab-raw">Advanced</button>
+              <button type="button" class="tab active" id="tab-form">Edit</button>
+              <button type="button" class="tab" id="tab-raw">Raw JSON</button>
             </div>
             <div class="editor-toolbar-right">
-              <p class="public-line">Live URL: <a id="public-url" href="#" target="_blank" rel="noopener">/content/…</a></p>
+              <p class="public-line"><span class="public-label">live</span> <a id="public-url" href="#" target="_blank" rel="noopener">/content/…</a></p>
               <button type="button" class="btn btn-secondary btn-sm" id="btn-history">History</button>
-              <button type="button" class="btn btn-save-top" id="btn-save-top">Save changes</button>
+              <button type="button" class="btn btn-save-top" id="btn-save-top">Save</button>
             </div>
           </div>
           <div id="form-root" class="form-root"></div>
@@ -397,6 +411,6 @@
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
   <script src="assets/js/form-engine.js?v=14"></script>
-  <script src="assets/js/admin-app.js?v=24"></script>
+  <script src="assets/js/admin-app.js?v=25"></script>
 </body>
 </html>

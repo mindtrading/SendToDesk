@@ -486,6 +486,7 @@ a {
   min-height: 100vh;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 .sidebar {
@@ -682,6 +683,38 @@ a {
   background: transparent !important;
 }
 
+.side-chrome {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: -4px -4px 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-panel);
+}
+
+.side-path {
+  margin-left: 6px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.side-section-label {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+}
+
+.side-section-label span {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .side-actions {
   display: flex;
   flex-wrap: wrap;
@@ -693,7 +726,11 @@ a {
   overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-soft);
 }
 
 .file-item {
@@ -701,13 +738,14 @@ a {
   background: transparent;
   border: 1px solid transparent;
   color: var(--text);
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 8px;
+  padding: 9px 10px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  align-items: baseline;
+  align-items: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .file-item:hover {
@@ -717,19 +755,37 @@ a {
 .file-item.active {
   background: var(--accent-soft);
   border-color: transparent;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.file-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.file-glyph {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  opacity: 0.85;
+  flex-shrink: 0;
 }
 
 .file-name {
   font-family: var(--font);
   font-weight: 650;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  letter-spacing: -0.01em;
 }
 
 .file-meta {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-family: var(--mono);
   opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .main {
@@ -763,13 +819,31 @@ a {
   min-width: 0;
 }
 
+.topbar-path {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.topbar-prefix {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+
 .topbar h1 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
+  font-family: var(--mono);
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .dirty-dot {
@@ -777,6 +851,7 @@ a {
   height: 8px;
   border-radius: 50%;
   background: var(--warn);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 22%, transparent);
 }
 
 .topbar-actions {
@@ -789,11 +864,18 @@ a {
 
 .user-chip {
   color: var(--muted);
-  font-size: 0.85rem;
-  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-family: var(--mono);
+  padding: 5px 10px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--bg-elev);
+}
+
+.user-chip::before {
+  content: "@";
+  color: var(--accent);
+  margin-right: 1px;
 }
 
 .editor {
@@ -807,14 +889,54 @@ a {
 
 .empty-state {
   max-width: 520px;
-  margin: 12vh auto 0;
-  text-align: center;
+  margin: 10vh auto 0;
+  text-align: left;
   color: var(--muted);
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, var(--accent-soft), transparent 40%),
+    var(--bg-elev);
+  box-shadow: var(--shadow);
+}
+
+.empty-kicker {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.empty-kicker span {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .empty-state h2 {
   color: var(--text);
-  margin-bottom: 8px;
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.empty-state p {
+  margin: 0 0 16px;
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.empty-code {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre-wrap;
 }
 
 .tabs {
@@ -2302,7 +2424,7 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
-  padding: 0 14px 12px;
+  padding: 0;
 }
 
 .side-nav-btn {
@@ -2313,8 +2435,19 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
   padding: 8px 10px;
   font: inherit;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.side-nav-btn .nav-prefix {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  opacity: 0.75;
 }
 
 .side-nav-btn.is-active {
@@ -2324,14 +2457,69 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
 }
 
 .side-hint {
-  margin: 0 14px 12px;
+  margin: 0 0 12px;
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.4;
 }
 
+.app-shell {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center;
+}
+
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-shell > .sidebar,
+.app-shell > .main {
+  position: relative;
+  z-index: 1;
+}
+
+.public-line {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+
+.public-label {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--ok-soft);
+  color: var(--ok);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.editor-toolbar .tab {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.save-bar-hint {
+  font-family: var(--mono);
+}
+
+.save-bar-file {
+  font-family: var(--mono);
+}
+
 .r2-status {
-  margin: 0 14px 16px;
+  margin: 0 0 16px;
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -2339,6 +2527,7 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-family: var(--mono);
   font-size: 0.84rem;
   font-weight: 600;
 }

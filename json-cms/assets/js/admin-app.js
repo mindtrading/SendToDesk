@@ -924,7 +924,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "file-item" + (f.name === state.currentName ? " active" : "");
-      btn.innerHTML = `<span class="file-name">${escapeHtml(prettyName(f.name))}</span><span class="file-meta">${escapeHtml(f.name)}</span>`;
+      btn.innerHTML = `<span class="file-row"><span class="file-glyph" aria-hidden="true">{ }</span><span class="file-name">${escapeHtml(prettyName(f.name))}</span></span><span class="file-meta">${escapeHtml(f.name)}</span>`;
       btn.addEventListener("click", () => {
         closeSidebarDrawer();
         openFile(f.name);
