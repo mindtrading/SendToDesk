@@ -292,6 +292,79 @@ a {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-height: 0;
+}
+
+.side-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.side-logout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.side-logout-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--bg-panel);
+  color: var(--muted);
+  flex-shrink: 0;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.side-logout-icon svg {
+  display: block;
+}
+
+.side-logout:hover {
+  background: var(--danger-soft);
+  border-color: transparent;
+  color: var(--danger);
+  transform: translateY(-1px);
+}
+
+.side-logout:hover .side-logout-icon {
+  background: var(--danger);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(192, 53, 43, 0.28);
+}
+
+.side-logout:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.side-logout:active {
+  transform: translateY(0);
 }
 
 .side-head {

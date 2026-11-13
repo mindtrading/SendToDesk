@@ -552,7 +552,7 @@
     if (sidebar) {
       sidebar.addEventListener("click", (e) => {
         const t = e.target.closest(
-          ".side-nav-btn, .file-item, #btn-new, #btn-refresh, #btn-seed"
+          ".side-nav-btn, .file-item, #btn-new, #btn-refresh, #btn-seed, #btn-logout"
         );
         if (!t) return;
         // let the button's own handler run, then close drawer
