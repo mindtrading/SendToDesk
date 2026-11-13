@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Content Studio</title>
+  <title>CorePanel</title>
   <meta name="robots" content="noindex" />
   <script>
     (function () {
@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=19" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=20" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -164,7 +164,15 @@
   <div id="app-view" class="app-shell" hidden>
     <aside class="sidebar" id="studio-sidebar">
       <div class="side-head">
-        <h2>Content Studio</h2>
+        <a class="side-brand" href="./" aria-label="CorePanel">
+          <img
+            class="side-logo"
+            src="assets/img/corepanel-logo.png"
+            alt="CorePanel"
+            width="200"
+            height="133"
+          />
+        </a>
       </div>
       <nav class="side-nav" aria-label="Studio sections">
         <button type="button" class="side-nav-btn is-active" id="nav-content" data-studio="content">Content</button>

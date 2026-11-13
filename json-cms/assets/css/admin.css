@@ -296,17 +296,34 @@ a {
 .side-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
+  padding: 2px 0 4px;
 }
 
-.side-head h2 {
-  margin: 0;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 700;
+.side-brand {
+  display: block;
+  line-height: 0;
+  text-decoration: none;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  width: 100%;
+}
+
+.side-brand:hover {
+  text-decoration: none;
+  opacity: 0.92;
+}
+
+.side-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 52px;
+  object-fit: contain;
+  object-position: left center;
+  background: #000;
 }
 
 .side-actions {
