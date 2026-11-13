@@ -521,21 +521,40 @@
         localStorage.setItem("cs-sidebar", open ? "open" : "collapsed");
       } catch (_) {}
     }
-    document.querySelectorAll(".sidebar-toggle").forEach((el) => {
-      el.classList.toggle("is-active", !!open);
-      el.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    if (btn) btn.title = open ? "Hide sidebar" : "Show sidebar";
+    if (btn) {
+      btn.classList.toggle("is-active", !!open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.title = open ? "Hide sidebar" : "Show sidebar";
+    }
+  }
+
+  /** Close mobile/tablet drawer after choosing a sidebar action */
+  function closeSidebarDrawer() {
+    if (isMobileNav()) setSidebarOpen(false);
   }
 
   function bindSidebarUi() {
     const btn = $("#btn-sidebar");
     const closeBtn = $("#btn-sidebar-close");
     const backdrop = $("#sidebar-backdrop");
+    const sidebar = $("#studio-sidebar");
     const toggle = () => setSidebarOpen(!isSidebarVisible());
     if (btn) btn.addEventListener("click", toggle);
     if (closeBtn) closeBtn.addEventListener("click", () => setSidebarOpen(false));
     if (backdrop) backdrop.addEventListener("click", () => setSidebarOpen(false));
+
+    // Any menu / action inside sidebar closes the slide-over on small screens
+    if (sidebar) {
+      sidebar.addEventListener("click", (e) => {
+        const t = e.target.closest(
+          ".side-nav-btn, .file-item, #btn-new, #btn-refresh, #btn-seed"
+        );
+        if (!t) return;
+        // let the button's own handler run, then close drawer
+        setTimeout(() => closeSidebarDrawer(), 0);
+      });
+    }
+
     window.addEventListener("resize", () => {
       if (isMobileNav()) {
         setSidebarOpen(false);
@@ -565,13 +584,13 @@
     if (navContent) {
       navContent.addEventListener("click", () => {
         setStudioSection("content");
-        setSidebarOpen(false);
+        closeSidebarDrawer();
       });
     }
     if (navMedia) {
       navMedia.addEventListener("click", () => {
         setStudioSection("media");
-        setSidebarOpen(false);
+        closeSidebarDrawer();
       });
     }
     const refresh = $("#media-refresh");
@@ -886,7 +905,7 @@
       btn.className = "file-item" + (f.name === state.currentName ? " active" : "");
       btn.innerHTML = `<span class="file-name">${escapeHtml(prettyName(f.name))}</span><span class="file-meta">${escapeHtml(f.name)}</span>`;
       btn.addEventListener("click", () => {
-        setSidebarOpen(false);
+        closeSidebarDrawer();
         openFile(f.name);
       });
       list.appendChild(btn);

@@ -776,36 +776,32 @@ a {
   border-color: var(--accent);
 }
 
-.sidebar-toggle .hb-icon {
+.sidebar-toggle .icon-menu,
+.sidebar-toggle .icon-close {
   display: block;
-  overflow: visible;
+  flex: 0 0 auto;
 }
 
-.sidebar-toggle .hb-line {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  transform-origin: center;
+.sidebar-toggle .icon-close {
+  display: none;
 }
 
-.sidebar-toggle.is-active .hb-1 {
-  transform: translateY(5px) rotate(45deg);
+.sidebar-toggle.is-active .icon-menu {
+  display: none;
 }
 
-.sidebar-toggle.is-active .hb-2 {
-  opacity: 0;
-}
-
-.sidebar-toggle.is-active .hb-3 {
-  transform: translateY(-5px) rotate(-45deg);
+.sidebar-toggle.is-active .icon-close {
+  display: block;
 }
 
 .sidebar-toggle-in {
   width: 34px;
   height: 34px;
   box-shadow: none;
+}
+
+.sidebar-toggle-in .icon-close {
+  display: block;
 }
 
 .app-shell {

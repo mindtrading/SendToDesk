@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=16" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=17" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -166,10 +166,8 @@
       <div class="side-head">
         <h2>Content Studio</h2>
         <button type="button" class="sidebar-toggle sidebar-toggle-in" id="btn-sidebar-close" aria-label="Hide sidebar" title="Hide sidebar">
-          <svg class="hb-icon" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-            <path class="hb-line hb-1" d="M4 4l12 12" />
-            <path class="hb-line hb-2" d="M4 4l12 12" opacity="0" />
-            <path class="hb-line hb-3" d="M16 4L4 16" />
+          <svg class="icon-close" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
           </svg>
         </button>
       </div>
@@ -198,10 +196,11 @@
       <header class="topbar">
         <div class="topbar-left">
           <button type="button" class="sidebar-toggle" id="btn-sidebar" aria-label="Toggle sidebar" aria-expanded="true" title="Toggle sidebar">
-            <svg class="hb-icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-              <path class="hb-line hb-1" d="M3 5h14" />
-              <path class="hb-line hb-2" d="M3 10h14" />
-              <path class="hb-line hb-3" d="M3 15h14" />
+            <svg class="icon-menu" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path d="M3 5h14M3 10h14M3 15h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+            <svg class="icon-close" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
             </svg>
           </button>
           <h1 id="current-file">Content Studio</h1>
@@ -332,6 +331,6 @@
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
   <script src="assets/js/form-engine.js?v=14"></script>
-  <script src="assets/js/admin-app.js?v=17"></script>
+  <script src="assets/js/admin-app.js?v=18"></script>
 </body>
 </html>
