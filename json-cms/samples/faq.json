@@ -1,0 +1,17 @@
+{
+  "title": "Frequently asked questions",
+  "items": [
+    {
+      "title": "Does SendToDesk upload my files to the cloud?",
+      "body": "<p>No. Transfers happen on your local Wi‑Fi between phone and PC.</p>"
+    },
+    {
+      "title": "Which Windows versions are supported?",
+      "body": "<p>Windows 10 and Windows 11 (64-bit).</p>"
+    },
+    {
+      "title": "How do I pair devices?",
+      "body": "<p>Use Nearby, scan the QR code, or enter the 6-digit code shown on the PC.</p>"
+    }
+  ]
+}

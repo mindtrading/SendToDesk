@@ -7,16 +7,18 @@
       "date": "2026-03-20",
       "published": true,
       "excerpt": "Send passport photos and scans from Android to Windows over Wi‑Fi.",
-      "body": "This is a sample post. Edit it from JSON CMS.\n\nAdd more posts with the Add item button."
+      "imageUrl": "https://sendtodesk.pages.dev/assets/img/app_logo.png",
+      "body": "<h2>Why SendToDesk?</h2>\n<p>Files stay on <strong>your local Wi‑Fi</strong>. No cloud upload for everyday transfers.</p>\n<ul>\n  <li>Passport photo tools</li>\n  <li>Document scan to PDF</li>\n  <li>Compress to KB limits</li>\n</ul>\n<p><a href=\"https://sendtodesk.pages.dev/#download\">Download Windows</a></p>"
     },
     {
-      "id": "install-guide",
+      "id": "install-windows",
       "title": "How to install on Windows",
       "slug": "install-windows",
       "date": "2026-03-18",
       "published": true,
-      "excerpt": "Download the zip, extract, run the app.",
-      "body": "1. Download the Windows build\n2. Extract the zip\n3. Run SendToDesk\n4. Connect from the Android app"
+      "excerpt": "Download the zip, extract, run the installer.",
+      "imageUrl": "",
+      "body": "<p>Follow these steps:</p>\n<ol>\n  <li>Download the Windows build</li>\n  <li>Extract the zip</li>\n  <li>Run the installer</li>\n  <li>Pair from the Android app</li>\n</ol>\n<p>Need help? Email <em>support@sendtodesk.app</em>.</p>"
     }
   ]
 }

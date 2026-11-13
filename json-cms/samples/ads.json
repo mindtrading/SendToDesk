@@ -1,18 +1,20 @@
 {
   "enabled": false,
+  "notes": "Store ad unit IDs here. Turn enabled on when ready to show ads.",
   "slots": [
     {
       "id": "home-banner",
+      "title": "Home banner",
       "type": "banner",
       "unitId": "ca-app-pub-xxxxxxxx/yyyyyyyyyy",
       "active": false
     },
     {
       "id": "blog-inline",
+      "title": "Blog inline",
       "type": "inline",
       "unitId": "",
       "active": false
     }
-  ],
-  "notes": "Store ad unit IDs here. Static site can fetch /content/ads.json"
+  ]
 }

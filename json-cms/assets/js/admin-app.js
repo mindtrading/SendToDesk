@@ -73,18 +73,25 @@
     renderFileList();
   }
 
+  function prettyName(name) {
+    return String(name || "")
+      .replace(/\.json$/i, "")
+      .replace(/[_-]+/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   function renderFileList() {
     const list = $("#file-list");
     list.innerHTML = "";
     if (!state.files.length) {
-      list.innerHTML = '<p class="muted empty-hint">No JSON yet. Create one or seed samples.</p>';
+      list.innerHTML = '<p class="muted empty-hint">No content yet. Click Load demos to start.</p>';
       return;
     }
     state.files.forEach((f) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "file-item" + (f.name === state.currentName ? " active" : "");
-      btn.innerHTML = `<span class="file-name">${escapeHtml(f.name)}</span><span class="file-meta">${formatSize(f.size)}</span>`;
+      btn.innerHTML = `<span class="file-name">${escapeHtml(prettyName(f.name))}</span><span class="file-meta">${escapeHtml(f.name)}</span>`;
       btn.addEventListener("click", () => openFile(f.name));
       list.appendChild(btn);
     });
@@ -113,7 +120,7 @@
       state.dirty = false;
       $("#editor-empty").hidden = true;
       $("#editor-panel").hidden = false;
-      $("#current-file").textContent = res.name;
+      $("#current-file").textContent = prettyName(res.name);
       $("#public-url").textContent = "/content/" + res.name;
       $("#public-url").href = "/content/" + res.name;
       renderEditor();
@@ -159,7 +166,7 @@
       try {
         state.data = JSON.parse($("#raw-editor").value);
       } catch {
-        toast("Raw JSON is invalid", "error");
+        toast("Advanced content is invalid", "error");
         return;
       }
     }
@@ -177,16 +184,21 @@
   }
 
   async function createFile() {
-    const name = prompt("New JSON file name (e.g. pages.json):");
+    const name = prompt("New content name (e.g. promotions or blog):");
     if (!name) return;
     let clean = name.trim().replace(/^\/+/, "");
     if (!clean.toLowerCase().endsWith(".json")) clean += ".json";
+    const starter = {
+      title: prettyName(clean),
+      published: false,
+      body: "<p>Start writing here…</p>",
+    };
     try {
       await api("/api/files", {
         method: "POST",
-        body: JSON.stringify({ name: clean, data: {} }),
+        body: JSON.stringify({ name: clean, data: starter }),
       });
-      toast("Created " + clean, "ok");
+      toast("Created " + prettyName(clean), "ok");
       await refreshFiles();
       await openFile(clean);
     } catch (e) {
@@ -214,16 +226,21 @@
   }
 
   async function seedSamples() {
-    if (!confirm("Upload sample JSON files (site-settings, ads, blog) if missing?")) return;
+    if (!confirm("Load demo content (settings, blog HTML, ads, pages, FAQ, team, all-types)? Existing demos will be refreshed.")) return;
     const samples = [
       "site-settings.json",
-      "ads.json",
       "blog.json",
+      "ads.json",
+      "pages.json",
+      "faq.json",
+      "team.json",
+      "all-types-demo.json",
     ];
+    let count = 0;
     for (const name of samples) {
       try {
-        const res = await fetch("samples/" + name);
-        if (!res.ok) throw new Error("Missing sample " + name);
+        const res = await fetch("samples/" + name + "?v=3");
+        if (!res.ok) throw new Error("Missing demo " + name);
         const data = await res.json();
         try {
           await api("/api/files", {
@@ -232,13 +249,18 @@
           });
         } catch (e) {
           if (e.status !== 409) throw e;
+          await api("/api/files/" + encodeURIComponent(name), {
+            method: "PUT",
+            body: JSON.stringify({ data }),
+          });
         }
+        count += 1;
       } catch (e) {
         toast(e.message, "error");
         return;
       }
     }
-    toast("Samples ready", "ok");
+    toast("Demos ready (" + count + ")", "ok");
     await refreshFiles();
   }
 

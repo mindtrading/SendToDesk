@@ -1,0 +1,16 @@
+{
+  "pages": [
+    {
+      "title": "About",
+      "slug": "about",
+      "published": true,
+      "body": "<h2>About SendToDesk</h2>\n<p>We build simple tools for photo counters and shops that move files from phone to PC every day.</p>"
+    },
+    {
+      "title": "Pricing",
+      "slug": "pricing",
+      "published": false,
+      "body": "<h2>Pricing</h2>\n<p>Desktop companion is free. Android app is on Google Play.</p>"
+    }
+  ]
+}

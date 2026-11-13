@@ -1,43 +1,24 @@
-# JSON CMS (SendToDesk এর সাথে)
+# Content Studio (JSON CMS)
 
-লাইভ URL: **https://sendtodesk.pages.dev/json-cms/**
+Live: **https://sendtodesk.pages.dev/json-cms/**
 
-এই অ্যাডমিন একই Cloudflare Pages প্রজেক্টে চলে। UI আছে `json-cms/` ফোল্ডারে; API আছে রুটের `functions/` এ (`/api/*`, `/content/*`)।
+Looks like a normal content editor for employees/clients. Data is still JSON in R2.
 
-## Cloudflare সেটআপ (একবার)
+## Features
 
-1. **R2** → Create bucket: `json-cms-content`
-2. Pages প্রজেক্ট **sendtodesk** → **Settings → Bindings** (বা Functions → R2):
-   - Binding name: `CONTENT`
-   - Bucket: `json-cms-content`
-3. **Environment variables** (Production + Preview):
-   - `ADMIN_USER` = `admin`
-   - `ADMIN_PASSWORD` = আপনার পাসওয়ার্ড
-   - `SESSION_SECRET` = লম্বা র‍্যান্ডম স্ট্রিং
-4. Redeploy / Git push
+- Structured forms (not “JSON jargon” by default)
+- HTML editor for blog/pages (`body`, `html`, `content`…) with toolbar + Preview
+- Smart fields: text, long text, HTML, link, email, date, color, number, toggle, sections, lists
+- List cards with reorder / duplicate / remove
+- **Load demos** samples: settings, blog, ads, pages, FAQ, team, all-types-demo
+- Advanced tab only for developers
 
-## ব্যবহার
+## Cloudflare setup
 
-1. খুলুন: https://sendtodesk.pages.dev/json-cms/
-2. লগইন
-3. **Seed samples** → `site-settings.json`, `ads.json`, `blog.json`
-4. এডিট → **Save**
-5. পাবলিক JSON: https://sendtodesk.pages.dev/content/blog.json
+1. R2 bucket `json-cms-content` bound as `CONTENT`
+2. Secrets: `ADMIN_USER`, `ADMIN_PASSWORD`, `SESSION_SECRET`
+3. Deploy this repo (Functions at repo root)
 
-## স্ট্যাটিক সাইট থেকে ফেচ
+## Public read
 
-```js
-const res = await fetch("https://sendtodesk.pages.dev/content/site-settings.json");
-const settings = await res.json();
-```
-
-## লোকাল
-
-```bash
-# রেপো রুট থেকে
-cp json-cms/.dev.vars.example .dev.vars
-# .dev.vars এ পাসওয়ার্ড সেট করুন
-npx wrangler pages dev . --r2=CONTENT
-```
-
-তারপর: http://localhost:8788/json-cms/
+`https://sendtodesk.pages.dev/content/blog.json`

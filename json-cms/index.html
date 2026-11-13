@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>JSON CMS — Cloudflare</title>
+  <title>Content Studio</title>
   <meta name="robots" content="noindex" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,13 +13,13 @@
 <body>
   <div id="login-view" class="login-view">
     <form id="login-form" class="login-card" autocomplete="on">
-      <div class="brand-mark"><span class="dot"></span><strong>JSON CMS</strong></div>
-      <h1>অ্যাডমিন লগইন</h1>
-      <p class="sub">R2-এর সব JSON এডিট করুন — অটো ফর্ম।</p>
+      <div class="brand-mark"><span class="dot"></span><strong>Content Studio</strong></div>
+      <h1>Sign in</h1>
+      <p class="sub">Edit website content — pages, blog, ads, and settings.</p>
       <div class="stack">
         <input id="username" class="input" name="username" placeholder="Username" required autocomplete="username" />
         <input id="password" class="input" name="password" type="password" placeholder="Password" required autocomplete="current-password" />
-        <button class="btn btn-block" type="submit">Login</button>
+        <button class="btn btn-block" type="submit">Sign in</button>
       </div>
       <p id="login-error" class="error" hidden></p>
     </form>
@@ -28,12 +28,12 @@
   <div id="app-view" class="app-shell" hidden>
     <aside class="sidebar">
       <div class="side-head">
-        <h2>JSON files</h2>
+        <h2>Content</h2>
       </div>
       <div class="side-actions">
-        <button type="button" class="btn btn-secondary btn-sm" id="btn-new">New</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-new">New content</button>
         <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh">Refresh</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="btn-seed">Seed samples</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-seed">Load demos</button>
       </div>
       <div id="file-list" class="file-list"></div>
     </aside>
@@ -41,8 +41,8 @@
     <section class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <h1 id="current-file">JSON CMS</h1>
-          <span id="dirty-dot" class="dirty-dot" hidden title="Unsaved"></span>
+          <h1 id="current-file">Content Studio</h1>
+          <span id="dirty-dot" class="dirty-dot" hidden title="Unsaved changes"></span>
         </div>
         <div class="topbar-actions">
           <span id="user-label" class="user-chip"></span>
@@ -54,18 +54,19 @@
 
       <div class="editor">
         <div id="editor-empty" class="empty-state">
-          <h2>একটা JSON সিলেক্ট করুন</h2>
-          <p>বাম পাশ থেকে ফাইল খুলুন, অথবা New / Seed samples চাপুন। স্ট্যাটিক সাইট পাবলিক URL থেকে ফেচ করবে: <code>/content/your-file.json</code></p>
+          <h2>Pick content to edit</h2>
+          <p>Choose an item on the left, or click <strong>Load demos</strong> to try site settings, blog HTML, ads, FAQ, team, and more.</p>
         </div>
 
         <div id="editor-panel" hidden>
           <div class="tabs">
-            <button type="button" class="tab active" id="tab-form">Form</button>
-            <button type="button" class="tab" id="tab-raw">Raw JSON</button>
+            <button type="button" class="tab active" id="tab-form">Edit content</button>
+            <button type="button" class="tab" id="tab-raw">Advanced</button>
           </div>
-          <p class="public-line">Public read: <a id="public-url" href="#" target="_blank" rel="noopener">/content/…</a></p>
+          <p class="public-line">Live URL: <a id="public-url" href="#" target="_blank" rel="noopener">/content/…</a></p>
           <div id="form-root"></div>
           <div id="raw-root" hidden>
+            <p class="field-hint advanced-hint">Advanced mode for developers only. Prefer Edit content for normal updates.</p>
             <textarea id="raw-editor" class="input textarea" spellcheck="false"></textarea>
           </div>
         </div>

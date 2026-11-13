@@ -1,0 +1,21 @@
+{
+  "title": "Team",
+  "people": [
+    {
+      "name": "Alex Rivera",
+      "title": "Product",
+      "email": "alex@example.com",
+      "avatar": "https://sendtodesk.pages.dev/assets/img/app_logo.png",
+      "bio": "Builds the phone-to-PC experience.",
+      "active": true
+    },
+    {
+      "name": "Sam Chen",
+      "title": "Support",
+      "email": "sam@example.com",
+      "avatar": "",
+      "bio": "Helps shops get set up on day one.",
+      "active": true
+    }
+  ]
+}

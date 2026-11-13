@@ -1,0 +1,33 @@
+{
+  "demoTitle": "All field types demo",
+  "shortText": "Plain short text",
+  "longText": "This is a longer description field.\nIt can span multiple lines for notes and summaries.",
+  "htmlContent": "<h2>HTML demo</h2>\n<p>Use this for <strong>blog</strong> and page bodies.</p>\n<ul>\n  <li>Bold / italic toolbar</li>\n  <li>Preview button</li>\n</ul>",
+  "websiteUrl": "https://sendtodesk.pages.dev/",
+  "supportEmail": "hello@example.com",
+  "publishDate": "2026-03-20",
+  "brandColor": "#3dba8c",
+  "price": 0,
+  "rating": 4.8,
+  "published": true,
+  "featured": false,
+  "emptyValue": null,
+  "tags": ["wifi", "android", "windows"],
+  "nestedSection": {
+    "label": "Nested section",
+    "enabled": true,
+    "notes": "Sections group related fields together."
+  },
+  "cards": [
+    {
+      "title": "Card one",
+      "description": "Array of objects becomes editable cards.",
+      "active": true
+    },
+    {
+      "title": "Card two",
+      "description": "Reorder with ↑ ↓, duplicate, or remove.",
+      "active": false
+    }
+  ]
+}
