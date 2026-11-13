@@ -1298,3 +1298,128 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
     flex: 1;
   }
 }
+
+/* ===== Templates ===== */
+.tpl-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--accent-soft);
+  margin-bottom: 4px;
+}
+
+.tpl-banner.is-free {
+  background: var(--bg-panel);
+}
+
+.tpl-banner-text {
+  font-size: 0.9rem;
+}
+
+.tpl-lock {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--bg-elev);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.tpl-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 20, 28, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.tpl-modal-card {
+  width: min(560px, 100%);
+  max-height: min(86vh, 720px);
+  overflow: auto;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 18px;
+}
+
+.tpl-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tpl-modal-head h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.tpl-modal-sub {
+  margin: 8px 0 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.tpl-modal-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tpl-card {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+}
+
+.tpl-card strong {
+  font-size: 0.98rem;
+}
+
+.tpl-card span {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.tpl-card.active {
+  border-color: transparent;
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent-ring);
+}
+
+.tpl-tag {
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--accent);
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.tpl-tag.is-free {
+  color: var(--muted);
+}
+
+.tpl-modal-footer {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}

@@ -214,8 +214,8 @@
     return wrap;
   }
 
-  function fieldControl(key, value, path, api) {
-    const kind = fieldKind(key, value);
+  function fieldControl(key, value, path, api, forcedKind) {
+    const kind = forcedKind || fieldKind(key, value);
 
     if (kind === "text" || kind === "email" || kind === "url" || kind === "date") {
       const input = el("input", {
@@ -325,7 +325,8 @@
   }
 
   function primitiveField(key, value, path, api, opts) {
-    const built = fieldControl(key, value, path, api);
+    const options = opts || {};
+    const built = fieldControl(key, value, path, api, options.forcedKind);
     if (!built) return null;
     const isMeta = META_KEYS.test(String(key));
     const node = el("div", {
@@ -335,17 +336,17 @@
         (built.kind === "boolean" ? " c-field-bool" : "") +
         (isMeta ? " c-field-meta" : ""),
     }, [
-      el("label", { className: "c-label", text: labelFromKey(key) }),
+      el("label", { className: "c-label", text: options.label || labelFromKey(key) }),
       built.control,
     ]);
-    if (opts && opts.showRemove) {
+    if (options.showRemove) {
       node.appendChild(
         el("button", {
           type: "button",
           className: "c-field-x",
           text: "×",
           title: "Remove field",
-          onClick: opts.showRemove,
+          onClick: options.showRemove,
         })
       );
     }
@@ -672,8 +673,253 @@
 
     destroyRichEditors();
     container.innerHTML = "";
-    container.appendChild(buildNode(current, [], api, "root", { depth: 0 }));
+
+    const template = hooks && hooks.template;
+    const locked = !!(template && template.fields && template.locked !== false);
+
+    if (locked) {
+      const banner = el("div", { className: "tpl-banner" }, [
+        el("div", { className: "tpl-banner-text" }, [
+          el("strong", { text: template.label + " template" }),
+          el("span", {
+            className: "muted",
+            text: " — Fixed fields. You can edit content, not the structure.",
+          }),
+        ]),
+        el("span", { className: "tpl-lock", text: "Locked" }),
+      ]);
+      container.appendChild(banner);
+      container.appendChild(buildSchemaRoot(template.fields, current, api));
+    } else {
+      if (template && template.id === "custom") {
+        container.appendChild(
+          el("div", { className: "tpl-banner is-free" }, [
+            el("div", { className: "tpl-banner-text" }, [
+              el("strong", { text: "Custom / freeform" }),
+              el("span", {
+                className: "muted",
+                text: " — Structure can be changed (advanced).",
+              }),
+            ]),
+          ])
+        );
+      }
+      container.appendChild(buildNode(current, [], api, "root", { depth: 0 }));
+    }
+
     mountRichEditors(container);
+  }
+
+  function buildSchemaRoot(fields, value, api) {
+    const wrap = el("div", { className: "c-root" });
+    wrap.appendChild(buildSchemaFields(fields, value || {}, [], api));
+    return wrap;
+  }
+
+  function buildSchemaFields(fields, value, path, api) {
+    const grid = el("div", { className: "c-grid" });
+    (fields || []).forEach((f) => {
+      if (f.key === "_template") return;
+      const v = value && value[f.key] !== undefined ? value[f.key] : null;
+      const childPath = path.concat(f.key);
+
+      if (f.type === "object") {
+        const group = el("div", { className: "c-group c-field-wide" }, [
+          el("div", { className: "c-group-head" }, [
+            el("h3", { className: "c-group-title", text: f.label || labelFromKey(f.key) }),
+          ]),
+          buildSchemaFields(f.fields || [], v && typeof v === "object" ? v : {}, childPath, api),
+        ]);
+        grid.appendChild(group);
+        return;
+      }
+
+      if (f.type === "array") {
+        grid.appendChild(buildSchemaArray(f, Array.isArray(v) ? v : [], childPath, api));
+        return;
+      }
+
+      let seed = v;
+      if (seed == null) {
+        if (f.type === "boolean") seed = false;
+        else if (f.type === "number") seed = 0;
+        else if (f.type === "html") seed = "<p></p>";
+        else seed = "";
+      }
+      const field = primitiveField(f.key, seed, childPath, api, {
+        label: f.label,
+        forcedKind: f.type,
+      });
+      if (field) grid.appendChild(field);
+    });
+    return grid;
+  }
+
+  function buildSchemaArray(fieldDef, value, path, api) {
+    const list = el("div", { className: "c-list" });
+    const sample = fieldDef.itemDefault
+      ? clone(fieldDef.itemDefault)
+      : { title: "New item" };
+    const itemLabel = fieldDef.itemLabel || "Item";
+
+    value.forEach((item, index) => {
+      const cardPath = path.concat(index);
+      const keyId = pathKey(cardPath);
+      const open = expandedCards.has(keyId) || (value.length <= 2 && index === 0);
+      const status = itemStatus(item);
+      const card = el("article", { className: "c-card" + (open ? " is-open" : "") });
+      const chevron = el("span", { className: "c-card-chevron", text: open ? "▾" : "▸" });
+      let bodyEl = null;
+
+      function ensureBody() {
+        if (bodyEl) return bodyEl;
+        bodyEl = el("div", { className: "c-card-body" });
+        const flat = el("div", { className: "c-flat" });
+        flat.appendChild(
+          buildSchemaFields(
+            fieldDef.itemFields || [],
+            item && typeof item === "object" ? item : {},
+            cardPath,
+            api
+          )
+        );
+        bodyEl.appendChild(flat);
+        card.appendChild(bodyEl);
+        mountRichEditors(bodyEl);
+        return bodyEl;
+      }
+
+      function setOpen(nextOpen) {
+        if (nextOpen) {
+          expandedCards.add(keyId);
+          card.classList.add("is-open");
+          chevron.textContent = "▾";
+          ensureBody();
+          bodyEl.hidden = false;
+        } else {
+          expandedCards.delete(keyId);
+          card.classList.remove("is-open");
+          chevron.textContent = "▸";
+          if (bodyEl) bodyEl.hidden = true;
+        }
+      }
+
+      card.appendChild(
+        el("div", { className: "c-card-head" }, [
+          el("button", {
+            type: "button",
+            className: "c-card-toggle",
+            onClick: () => setOpen(!expandedCards.has(keyId)),
+          }, [
+            chevron,
+            el("span", { className: "c-card-title", text: itemTitle(item, index) }),
+            status
+              ? el("span", {
+                  className: "c-status " + (/Draft|Inactive|Off/i.test(status) ? "is-draft" : "is-live"),
+                  text: status,
+                })
+              : null,
+            el("span", { className: "c-card-num", text: "#" + (index + 1) }),
+          ]),
+          el("div", { className: "c-card-actions" }, [
+            el("button", {
+              type: "button",
+              className: "btn btn-ghost btn-tiny",
+              text: "Up",
+              disabled: index === 0,
+              onClick: () => {
+                if (index === 0) return;
+                const next = value.slice();
+                const t = next[index - 1];
+                next[index - 1] = next[index];
+                next[index] = t;
+                api.structure(path, next);
+              },
+            }),
+            el("button", {
+              type: "button",
+              className: "btn btn-ghost btn-tiny",
+              text: "Down",
+              disabled: index === value.length - 1,
+              onClick: () => {
+                if (index >= value.length - 1) return;
+                const next = value.slice();
+                const t = next[index + 1];
+                next[index + 1] = next[index];
+                next[index] = t;
+                api.structure(path, next);
+              },
+            }),
+            el("button", {
+              type: "button",
+              className: "btn btn-ghost btn-tiny",
+              text: "Copy",
+              onClick: () => {
+                const next = value.slice();
+                const copy = clone(item);
+                if (copy && typeof copy === "object") {
+                  if (copy.title) copy.title = copy.title + " (copy)";
+                  if (copy.id) copy.id = String(copy.id) + "-copy";
+                  if (copy.slug) copy.slug = String(copy.slug) + "-copy";
+                  if ("published" in copy) copy.published = false;
+                }
+                next.splice(index + 1, 0, copy);
+                expandedCards.add(pathKey(path.concat(index + 1)));
+                api.structure(path, next);
+              },
+            }),
+            el("button", {
+              type: "button",
+              className: "btn btn-ghost btn-tiny c-danger",
+              text: "Delete",
+              onClick: () => {
+                if (!confirm("Delete this " + itemLabel.toLowerCase() + "?")) return;
+                const next = value.slice();
+                next.splice(index, 1);
+                expandedCards.delete(keyId);
+                api.structure(path, next);
+              },
+            }),
+          ]),
+        ])
+      );
+
+      if (open) {
+        ensureBody();
+        bodyEl.hidden = false;
+      }
+      list.appendChild(card);
+    });
+
+    return el("section", { className: "c-collection c-field-wide" }, [
+      el("div", { className: "c-collection-head" }, [
+        el("div", { className: "c-collection-titles" }, [
+          el("h2", { className: "c-collection-title", text: fieldDef.label || labelFromKey(fieldDef.key) }),
+          el("span", {
+            className: "c-collection-count",
+            text: value.length + (value.length === 1 ? " item" : " items"),
+          }),
+        ]),
+        el("button", {
+          type: "button",
+          className: "btn btn-secondary btn-sm",
+          text: "+ Add " + itemLabel.toLowerCase(),
+          onClick: () => {
+            const next = value.slice();
+            const neu = clone(sample);
+            if (neu && typeof neu === "object") {
+              if ("id" in neu) neu.id = "item-" + Date.now().toString(36);
+              if ("slug" in neu) neu.slug = "new-item";
+              if ("published" in neu) neu.published = false;
+            }
+            next.push(neu);
+            expandedCards.add(pathKey(path.concat(next.length - 1)));
+            api.structure(path, next);
+          },
+        }),
+      ]),
+      list,
+    ]);
   }
 
   global.FormEngine = {

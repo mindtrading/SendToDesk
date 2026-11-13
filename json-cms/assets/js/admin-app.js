@@ -6,6 +6,8 @@
     data: null,
     dirty: false,
     mode: "form", // form | raw
+    template: null,
+    pickTemplateId: "blog",
   };
 
   const THEME_KEY = "cs-theme";
@@ -145,7 +147,17 @@
     try {
       const res = await api("/api/files/" + encodeURIComponent(name).replace(/%2F/g, "/"));
       state.currentName = res.name;
-      state.data = res.data;
+      const resolved = window.ContentTemplates
+        ? ContentTemplates.resolve(res.name, res.data)
+        : null;
+      state.template = resolved;
+      state.data =
+        resolved && resolved.fields && window.ContentTemplates
+          ? ContentTemplates.applyDefaults(res.data, resolved)
+          : res.data;
+      if (state.template && state.data && !state.data._template) {
+        state.data._template = state.template.id;
+      }
       state.dirty = false;
       $("#editor-empty").hidden = true;
       $("#editor-panel").hidden = false;
@@ -154,7 +166,7 @@
       $("#public-url").href = "/content/" + res.name;
       $("#save-bar").hidden = false;
       $("#save-bar-file").textContent = prettyName(res.name);
-      state.snapshot = JSON.stringify(res.data);
+      state.snapshot = JSON.stringify(state.data);
       renderEditor();
       renderFileList();
       setDirty(false);
@@ -190,6 +202,7 @@
       $("#raw-root").hidden = true;
       $("#form-root").hidden = false;
       FormEngine.render($("#form-root"), state.data, {
+        template: state.template,
         onChange: (next) => {
           state.data = next;
           setDirty(true);
@@ -256,21 +269,64 @@
     }
   }
 
+  function openTemplateModal() {
+    if (!window.ContentTemplates) {
+      toast("Templates failed to load", "error");
+      return;
+    }
+    const modal = $("#tpl-modal");
+    const list = $("#tpl-modal-list");
+    list.innerHTML = "";
+    state.pickTemplateId = "blog";
+    ContentTemplates.list().forEach((t) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "tpl-card" + (t.id === state.pickTemplateId ? " active" : "");
+      btn.innerHTML =
+        "<strong>" +
+        escapeHtml(t.label) +
+        "</strong><span>" +
+        escapeHtml(t.description || "") +
+        "</span>" +
+        (t.fields
+          ? '<em class="tpl-tag">Locked fields</em>'
+          : '<em class="tpl-tag is-free">Freeform</em>');
+      btn.addEventListener("click", () => {
+        state.pickTemplateId = t.id;
+        list.querySelectorAll(".tpl-card").forEach((el) => el.classList.remove("active"));
+        btn.classList.add("active");
+        $("#tpl-file-name").value = t.defaultFile || t.id + ".json";
+      });
+      list.appendChild(btn);
+    });
+    const first = ContentTemplates.get(state.pickTemplateId);
+    $("#tpl-file-name").value = (first && first.defaultFile) || "blog.json";
+    modal.hidden = false;
+  }
+
+  function closeTemplateModal() {
+    $("#tpl-modal").hidden = true;
+  }
+
   async function createFile() {
-    const name = prompt("New content name (e.g. promotions or blog):");
-    if (!name) return;
-    let clean = name.trim().replace(/^\/+/, "");
+    openTemplateModal();
+  }
+
+  async function createFromTemplate() {
+    if (!window.ContentTemplates) return;
+    let clean = ($("#tpl-file-name").value || "").trim().replace(/^\/+/, "");
+    if (!clean) {
+      toast("Enter a file name", "error");
+      return;
+    }
     if (!clean.toLowerCase().endsWith(".json")) clean += ".json";
-    const starter = {
-      title: prettyName(clean),
-      published: false,
-      body: "<p>Start writing here…</p>",
-    };
+    const data = ContentTemplates.createData(state.pickTemplateId);
     try {
       await api("/api/files", {
         method: "POST",
-        body: JSON.stringify({ name: clean, data: starter }),
+        body: JSON.stringify({ name: clean, data }),
       });
+      closeTemplateModal();
       toast("Created " + prettyName(clean), "ok");
       await refreshFiles();
       await openFile(clean);
@@ -382,6 +438,16 @@
   $("#btn-refresh").addEventListener("click", () => refreshFiles().catch((e) => toast(e.message, "error")));
   $("#btn-new").addEventListener("click", createFile);
   $("#btn-seed").addEventListener("click", seedSamples);
+  const tplClose = $("#tpl-modal-close");
+  if (tplClose) tplClose.addEventListener("click", closeTemplateModal);
+  const tplCreate = $("#tpl-modal-create");
+  if (tplCreate) tplCreate.addEventListener("click", createFromTemplate);
+  const tplModal = $("#tpl-modal");
+  if (tplModal) {
+    tplModal.addEventListener("click", (e) => {
+      if (e.target === tplModal) closeTemplateModal();
+    });
+  }
   $("#btn-save").addEventListener("click", saveFile);
   const saveTop = $("#btn-save-top");
   if (saveTop) saveTop.addEventListener("click", saveFile);

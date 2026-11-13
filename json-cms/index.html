@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=8" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=9" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -117,8 +117,25 @@
 
   <div id="toast" class="toast" role="status"></div>
 
+  <div id="tpl-modal" class="tpl-modal" hidden>
+    <div class="tpl-modal-card" role="dialog" aria-modal="true" aria-labelledby="tpl-modal-title">
+      <div class="tpl-modal-head">
+        <h2 id="tpl-modal-title">New content</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="tpl-modal-close">Close</button>
+      </div>
+      <p class="tpl-modal-sub">Pick a template. Locked templates keep fields safe for clients.</p>
+      <div id="tpl-modal-list" class="tpl-modal-list"></div>
+      <div class="tpl-modal-footer">
+        <label class="c-label" for="tpl-file-name">File name</label>
+        <input id="tpl-file-name" class="input" placeholder="blog.json" />
+        <button type="button" class="btn btn-block" id="tpl-modal-create" style="margin-top:10px">Create</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
-  <script src="assets/js/form-engine.js?v=8"></script>
-  <script src="assets/js/admin-app.js?v=8"></script>
+  <script src="assets/js/templates.js?v=1"></script>
+  <script src="assets/js/form-engine.js?v=9"></script>
+  <script src="assets/js/admin-app.js?v=9"></script>
 </body>
 </html>
