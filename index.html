@@ -17,21 +17,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/assets/css/site.css" />
 </head>
-<body>
+<body data-page="home">
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="wrap header-row">
       <a class="brand" href="./">
         <img src="/assets/img/app_logo.png" alt="SendToDesk" width="36" height="36" />
-        SendToDesk
+        <span data-cms="site-name">SendToDesk</span>
       </a>
       <button class="menu-btn" type="button" aria-label="Menu">Menu</button>
       <nav class="nav">
         <a href="#features">Features</a>
         <a href="#how">How it works</a>
+        <a href="#blog">Blog</a>
         <a data-dl="windows" href="https://pub-39a92e5168a84fd6a714627aef76b5f1.r2.dev/SendToDesk_1.0.zip" download="SendToDesk-1.0.0-windows.zip">Download</a>
         <a href="support/">Support</a>
-        <a class="nav-cta" href="#download">Download now</a>
+        <a class="nav-cta" href="#download" data-cms="hero-cta">Download now</a>
       </nav>
     </div>
   </header>
@@ -47,10 +48,10 @@
       <div class="wrap hero-grid">
         <div>
           <p class="eyebrow">Android + Windows</p>
-          <h1>The fast way from phone to PC.</h1>
-          <p class="lede">Scan a document or make a passport photo on Android. SendToDesk Desktop receives it on Windows over the same Wi‑Fi — no cloud, no cable, no chat hop.</p>
+          <h1 data-cms="hero-title">The fast way from phone to PC.</h1>
+          <p class="lede" data-cms="hero-subtitle">Scan a document or make a passport photo on Android. SendToDesk Desktop receives it on Windows over the same Wi‑Fi — no cloud, no cable, no chat hop.</p>
           <div class="actions">
-            <a class="btn btn-primary" data-dl="windows" href="https://pub-39a92e5168a84fd6a714627aef76b5f1.r2.dev/SendToDesk_1.0.zip" download="SendToDesk-1.0.0-windows.zip">Download now</a>
+            <a class="btn btn-primary" data-dl="windows" data-cms="hero-cta" href="https://pub-39a92e5168a84fd6a714627aef76b5f1.r2.dev/SendToDesk_1.0.zip" download="SendToDesk-1.0.0-windows.zip">Download now</a>
             <a class="btn btn-secondary" data-dl="play" href="https://play.google.com/store/apps/details?id=com.docs.scan.sendtodesk">Get Android app</a>
           </div>
           <div class="platforms">
@@ -60,7 +61,7 @@
           </div>
         </div>
         <div class="hero-art">
-          <img src="/assets/img/hero.png?v=3" alt="SendToDesk on Android sending a file to SendToDesk Desktop on Windows" width="1152" height="864" />
+          <img data-cms="hero-image" src="/assets/img/hero.png?v=3" alt="SendToDesk on Android sending a file to SendToDesk Desktop on Windows" width="1152" height="864" />
           <div class="hero-art-flow" aria-hidden="true">
             <span class="wifi-ring r1"></span>
             <span class="wifi-ring r2"></span>
@@ -180,6 +181,15 @@
       </div>
     </section>
 
+    <section class="section blog-section" id="blog" hidden>
+      <div class="wrap">
+        <h2>From the blog</h2>
+        <p class="section-lead">Guides and updates, edited live from Content Studio.</p>
+        <div class="blog-grid" id="blog-list"></div>
+        <p class="blog-all"><a href="blog/">View all posts</a></p>
+      </div>
+    </section>
+
     <section class="download" id="download">
       <div class="wrap">
         <h2>Download now.</h2>
@@ -217,14 +227,15 @@
       <div>
         <a class="brand brand-light" href="./">
           <img src="/assets/img/app_logo.png" alt="SendToDesk" width="36" height="36" />
-          SendToDesk
+          <span data-cms="site-name">SendToDesk</span>
         </a>
-        <p>Phone to Windows PC over local Wi‑Fi. Files never go to a SendToDesk cloud.</p>
+        <p data-cms="tagline">Phone to Windows PC over local Wi‑Fi. Files never go to a SendToDesk cloud.</p>
       </div>
       <div>
         <h4>Product</h4>
         <a href="#features">Features</a>
         <a href="#how">How it works</a>
+        <a href="#blog">Blog</a>
         <a data-dl="windows" href="https://pub-39a92e5168a84fd6a714627aef76b5f1.r2.dev/SendToDesk_1.0.zip" download="SendToDesk-1.0.0-windows.zip">Download Windows</a>
         <a data-dl="play" href="https://play.google.com/store/apps/details?id=com.docs.scan.sendtodesk">Google Play</a>
       </div>
@@ -232,6 +243,7 @@
         <h4>Help</h4>
         <a href="install/">Install guide</a>
         <a href="support/">Support</a>
+        <a href="blog/">Blog</a>
       </div>
       <div>
         <h4>Legal</h4>
@@ -244,6 +256,6 @@
       <span>Static site · host anywhere</span>
     </div>
   </footer>
-  <script src="/assets/js/site.js"></script>
+  <script src="/assets/js/site.js?v=2"></script>
 </body>
 </html>

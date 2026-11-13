@@ -1,32 +1,289 @@
 (function () {
   var cfg = {
+    siteName: "SendToDesk",
+    tagline: "Phone to Windows PC over Wi‑Fi",
     version: "1.0.0",
     email: "mindtradingapp@gmail.com",
     windows: "https://pub-39a92e5168a84fd6a714627aef76b5f1.r2.dev/SendToDesk_1.0.zip",
     play: "https://play.google.com/store/apps/details?id=com.docs.scan.sendtodesk",
+    themeColor: "",
+    hero: {
+      title: "",
+      subtitle: "",
+      ctaLabel: "",
+      imageUrl: "",
+    },
   };
 
-  document.querySelectorAll("[data-dl]").forEach(function (el) {
-    var kind = el.getAttribute("data-dl");
-    if (kind === "windows") {
-      el.setAttribute("href", rootHref(cfg.windows));
-      el.setAttribute("download", "SendToDesk-" + cfg.version + "-windows.zip");
+  function contentUrl(name) {
+    return "/content/" + encodeURIComponent(name).replace(/%2F/g, "/");
+  }
+
+  function rootHref(path) {
+    if (/^https?:\/\//i.test(path)) return path;
+    var here = location.pathname;
+    if (
+      here.indexOf("/privacy") !== -1 ||
+      here.indexOf("/terms") !== -1 ||
+      here.indexOf("/support") !== -1 ||
+      here.indexOf("/install") !== -1 ||
+      here.indexOf("/blog") !== -1
+    ) {
+      return "../" + path.replace(/^\//, "");
     }
-    if (kind === "play") el.setAttribute("href", cfg.play);
-  });
+    return path;
+  }
 
-  document.querySelectorAll("[data-version]").forEach(function (el) {
-    el.textContent = cfg.version;
-  });
+  function blogHref(slug) {
+    var base = location.pathname.indexOf("/blog") !== -1 ? "./" : "blog/";
+    return base + "?slug=" + encodeURIComponent(slug);
+  }
 
-  document.querySelectorAll("[data-email]").forEach(function (el) {
-    el.setAttribute("href", "mailto:" + cfg.email);
-    el.textContent = cfg.email;
-  });
+  function applyDownloads() {
+    document.querySelectorAll("[data-dl]").forEach(function (el) {
+      var kind = el.getAttribute("data-dl");
+      if (kind === "windows") {
+        el.setAttribute("href", rootHref(cfg.windows));
+        el.setAttribute("download", "SendToDesk-" + cfg.version + "-windows.zip");
+      }
+      if (kind === "play") el.setAttribute("href", cfg.play);
+    });
 
-  document.querySelectorAll(".dl-card[data-os=\"windows\"]").forEach(function (card) {
-    card.classList.add("preferred");
-  });
+    document.querySelectorAll("[data-version]").forEach(function (el) {
+      el.textContent = cfg.version;
+    });
+
+    document.querySelectorAll("[data-email]").forEach(function (el) {
+      el.setAttribute("href", "mailto:" + cfg.email);
+      el.textContent = cfg.email;
+    });
+
+    document.querySelectorAll('.dl-card[data-os="windows"]').forEach(function (card) {
+      card.classList.add("preferred");
+    });
+  }
+
+  function setText(sel, value) {
+    if (!value) return;
+    document.querySelectorAll(sel).forEach(function (el) {
+      el.textContent = value;
+    });
+  }
+
+  function applySettings(data) {
+    if (!data || typeof data !== "object") return;
+    if (data.published === false) return;
+
+    if (data.siteName) cfg.siteName = String(data.siteName);
+    if (data.tagline) cfg.tagline = String(data.tagline);
+    if (data.supportEmail) cfg.email = String(data.supportEmail);
+    if (data.themeColor) cfg.themeColor = String(data.themeColor);
+
+    var dl = data.download || {};
+    if (dl.version) cfg.version = String(dl.version);
+    if (dl.windowsUrl) cfg.windows = String(dl.windowsUrl);
+    if (dl.playStoreUrl) cfg.play = String(dl.playStoreUrl);
+
+    var hero = data.hero || {};
+    cfg.hero = {
+      title: hero.title ? String(hero.title) : "",
+      subtitle: hero.subtitle ? String(hero.subtitle) : "",
+      ctaLabel: hero.ctaLabel ? String(hero.ctaLabel) : "",
+      imageUrl: hero.imageUrl ? String(hero.imageUrl) : "",
+    };
+
+    setText("[data-cms=\"site-name\"]", cfg.siteName);
+    setText("[data-cms=\"tagline\"]", cfg.tagline);
+
+    if (cfg.hero.title) setText("[data-cms=\"hero-title\"]", cfg.hero.title);
+    if (cfg.hero.subtitle) setText("[data-cms=\"hero-subtitle\"]", cfg.hero.subtitle);
+    if (cfg.hero.ctaLabel) {
+      document.querySelectorAll("[data-cms=\"hero-cta\"]").forEach(function (el) {
+        el.textContent = cfg.hero.ctaLabel;
+      });
+    }
+    if (cfg.hero.imageUrl) {
+      document.querySelectorAll("[data-cms=\"hero-image\"]").forEach(function (el) {
+        el.setAttribute("src", cfg.hero.imageUrl);
+      });
+    }
+
+    if (cfg.themeColor) {
+      document.documentElement.style.setProperty("--teal", cfg.themeColor);
+      var themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute("content", cfg.themeColor);
+    }
+
+    if (cfg.siteName) {
+      var titleEl = document.querySelector("title");
+      if (titleEl && document.body && document.body.dataset.page === "home") {
+        titleEl.textContent = cfg.siteName + " — " + (cfg.tagline || "Phone to Windows PC");
+      }
+      var ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute("content", cfg.siteName);
+    }
+    if (cfg.hero.subtitle) {
+      var desc = document.querySelector('meta[name="description"]');
+      if (desc && document.body && document.body.dataset.page === "home") {
+        desc.setAttribute("content", cfg.hero.subtitle);
+      }
+    }
+
+    applyDownloads();
+  }
+
+  function publishedPosts(data) {
+    var posts = (data && data.posts) || [];
+    return posts
+      .filter(function (p) {
+        return p && p.published !== false && (p.title || p.slug);
+      })
+      .slice()
+      .sort(function (a, b) {
+        return String(b.date || "").localeCompare(String(a.date || ""));
+      });
+  }
+
+  function escapeHtml(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "";
+    var d = new Date(iso + (iso.length === 10 ? "T00:00:00" : ""));
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  function renderBlogList(posts) {
+    var list = document.getElementById("blog-list");
+    var section = document.getElementById("blog");
+    if (!list) return;
+    if (!posts.length) {
+      if (section) section.hidden = true;
+      return;
+    }
+    if (section) section.hidden = false;
+    list.innerHTML = posts
+      .map(function (p) {
+        var slug = p.slug || p.id || "";
+        var img = p.imageUrl
+          ? '<img class="blog-card-img" src="' +
+            escapeHtml(p.imageUrl) +
+            '" alt="" loading="lazy" width="640" height="360" />'
+          : "";
+        return (
+          '<article class="blog-card">' +
+          img +
+          '<div class="blog-card-body">' +
+          (p.date ? '<time datetime="' + escapeHtml(p.date) + '">' + escapeHtml(formatDate(p.date)) + "</time>" : "") +
+          "<h3><a href=\"" +
+          escapeHtml(blogHref(slug)) +
+          '">' +
+          escapeHtml(p.title || "Untitled") +
+          "</a></h3>" +
+          (p.excerpt ? "<p>" + escapeHtml(p.excerpt) + "</p>" : "") +
+          '<a class="blog-more" href="' +
+          escapeHtml(blogHref(slug)) +
+          '">Read more</a>' +
+          "</div></article>"
+        );
+      })
+      .join("");
+  }
+
+  function renderBlogPage(posts) {
+    var mount = document.getElementById("blog-mount");
+    if (!mount) return;
+    var slug = new URLSearchParams(location.search).get("slug") || "";
+
+    if (!slug) {
+      document.title = "Blog — " + cfg.siteName;
+      if (!posts.length) {
+        mount.innerHTML = "<p>No posts published yet.</p>";
+        return;
+      }
+      mount.innerHTML =
+        '<p class="kicker">Updates</p><h1>Blog</h1>' +
+        '<p class="meta">Tips and product notes from SendToDesk.</p>' +
+        '<div class="blog-grid">' +
+        posts
+          .map(function (p) {
+            var s = p.slug || p.id || "";
+            return (
+              '<article class="blog-card">' +
+              (p.imageUrl
+                ? '<img class="blog-card-img" src="' +
+                  escapeHtml(p.imageUrl) +
+                  '" alt="" loading="lazy" />'
+                : "") +
+              '<div class="blog-card-body">' +
+              (p.date ? "<time>" + escapeHtml(formatDate(p.date)) + "</time>" : "") +
+              "<h3><a href=\"" +
+              escapeHtml(blogHref(s)) +
+              '">' +
+              escapeHtml(p.title || "Untitled") +
+              "</a></h3>" +
+              (p.excerpt ? "<p>" + escapeHtml(p.excerpt) + "</p>" : "") +
+              "</div></article>"
+            );
+          })
+          .join("") +
+        "</div>";
+      return;
+    }
+
+    var post = posts.find(function (p) {
+      return p.slug === slug || p.id === slug;
+    });
+    if (!post) {
+      mount.innerHTML =
+        '<p class="meta">Post not found. <a href="./">All posts</a></p>';
+      return;
+    }
+
+    document.title = (post.title || "Post") + " — " + cfg.siteName;
+    mount.innerHTML =
+      '<p class="kicker"><a href="./">Blog</a></p>' +
+      "<h1>" +
+      escapeHtml(post.title || "Untitled") +
+      "</h1>" +
+      (post.date
+        ? '<p class="meta"><time datetime="' +
+          escapeHtml(post.date) +
+          '">' +
+          escapeHtml(formatDate(post.date)) +
+          "</time></p>"
+        : "") +
+      (post.imageUrl
+        ? '<img class="blog-hero-img" src="' +
+          escapeHtml(post.imageUrl) +
+          '" alt="" width="960" height="540" />'
+        : "") +
+      '<div class="blog-body">' +
+      (post.body || "") +
+      "</div>";
+  }
+
+  async function fetchJson(name) {
+    try {
+      var res = await fetch(contentUrl(name), { credentials: "omit" });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  applyDownloads();
 
   var btn = document.querySelector(".menu-btn");
   if (btn) {
@@ -35,14 +292,16 @@
     });
   }
 
-  function rootHref(path) {
-    if (/^https?:\/\//i.test(path)) return path;
-    var here = location.pathname;
-    if (here.indexOf("/privacy") !== -1 || here.indexOf("/terms") !== -1 || here.indexOf("/support") !== -1 || here.indexOf("/install") !== -1) {
-      return "../" + path;
+  Promise.all([fetchJson("site-settings.json"), fetchJson("blog.json")]).then(
+    function (results) {
+      var settings = results[0];
+      var blog = results[1];
+      if (settings) applySettings(settings);
+      var posts = publishedPosts(blog);
+      renderBlogList(posts);
+      renderBlogPage(posts);
     }
-    return path;
-  }
+  );
 
   var hero = document.querySelector(".hero");
   var canvas = document.querySelector(".hero-particles");
@@ -204,10 +463,13 @@
     seed();
     window.addEventListener("resize", seed);
     if ("IntersectionObserver" in window) {
-      var io = new IntersectionObserver(function (entries) {
-        if (entries[0].isIntersecting) start();
-        else stop();
-      }, { threshold: 0.05 });
+      var io = new IntersectionObserver(
+        function (entries) {
+          if (entries[0].isIntersecting) start();
+          else stop();
+        },
+        { threshold: 0.05 }
+      );
       io.observe(hero);
     } else {
       start();

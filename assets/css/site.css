@@ -638,6 +638,89 @@ img { max-width: 100%; display: block; }
   font-size: 13px;
 }
 
+.blog-section { background: var(--bg); }
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.blog-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.blog-card-img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #e8f0ee;
+}
+.blog-card-body {
+  padding: 22px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.blog-card-body time {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.blog-card-body h3 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.blog-card-body h3 a {
+  color: var(--text);
+  text-decoration: none;
+}
+.blog-card-body h3 a:hover { color: var(--teal); }
+.blog-card-body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+.blog-more {
+  margin-top: auto;
+  padding-top: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.blog-all {
+  margin: 28px 0 0;
+  text-align: center;
+  font-weight: 700;
+}
+.blog-page { max-width: 760px; }
+.blog-hero-img {
+  width: 100%;
+  border-radius: 16px;
+  margin: 8px 0 28px;
+  border: 1px solid var(--line);
+}
+.blog-body {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.blog-body h2,
+.blog-body h3 {
+  letter-spacing: -0.02em;
+  margin: 1.4em 0 0.45em;
+}
+.blog-body p,
+.blog-body li { color: var(--muted); }
+.blog-body a { font-weight: 600; }
+.blog-body img { border-radius: 12px; margin: 16px 0; }
+
 @media (max-width: 900px) {
   .menu-btn { display: inline-flex; align-items: center; }
   .nav {
@@ -654,7 +737,7 @@ img { max-width: 100%; display: block; }
     gap: 14px;
   }
   body.nav-open .nav { display: flex; }
-  .hero-grid, .features, .steps, .split, .dl-grid, .footer-grid {
+  .hero-grid, .features, .steps, .split, .dl-grid, .footer-grid, .blog-grid {
     grid-template-columns: 1fr;
   }
   .hero { padding: 48px 0 56px; }
