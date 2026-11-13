@@ -2,24 +2,18 @@
 
 Live: **https://sendtodesk.pages.dev/json-cms/**
 
-Looks like a normal content editor for employees/clients. Data is still JSON in R2.
+Looks like a normal content editor. Data is JSON in R2. Public site fetches `/content/*.json`.
 
-## Features
+## Full client guide (Bangla)
 
-- Structured forms (not “JSON jargon” by default)
-- HTML editor (SunEditor) for blog/pages with **R2 image upload** + insert
-- Locked templates (Blog, FAQ, Pages, Settings, Ads, Team)
-- Smart fields: text, long text, HTML, link, email, date, color, number, toggle, sections, lists
-- List cards with reorder / duplicate / remove
-- **Load demos** samples: settings, blog, ads, pages, FAQ, team, all-types-demo
-- Advanced tab only for developers
+**[→ ক্লায়েন্ট সাইট + CMS সেটআপ সম্পূর্ণ গাইড](../docs/CLIENT_CMS_GUIDE_BN.md)**
 
-## Cloudflare setup
+## Cloudflare (per project)
 
-1. R2 bucket `json-cms-content` bound as `CONTENT`
+1. R2 bucket bound as `CONTENT`
 2. Secrets: `ADMIN_USER`, `ADMIN_PASSWORD`, `SESSION_SECRET`
-3. Deploy this repo (Functions at repo root)
+3. Deploy → `/json-cms/` → first login runs setup wizard
 
 ## Public read
 
-`https://sendtodesk.pages.dev/content/blog.json`
+`https://YOUR-DOMAIN/content/blog.json`
