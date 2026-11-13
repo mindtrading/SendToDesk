@@ -305,10 +305,12 @@ a {
   display: block;
   line-height: 0;
   text-decoration: none;
-  border-radius: 10px;
-  overflow: hidden;
-  background: transparent;
-  width: 100%;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent !important;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0 !important;
 }
 
 .side-brand:hover {
@@ -324,21 +326,7 @@ a {
   max-height: 48px;
   object-fit: contain;
   object-position: left center;
-  background: transparent;
-}
-
-/* Wordmark has light glyphs — small dark plate only in light theme so it stays readable */
-html[data-theme="light"] .side-brand {
-  background: #111;
-  padding: 8px 10px;
-  border-radius: 10px;
-  width: fit-content;
-  max-width: 100%;
-}
-
-html[data-theme="dark"] .side-brand {
-  background: transparent;
-  padding: 0;
+  background: transparent !important;
 }
 
 .side-actions {
