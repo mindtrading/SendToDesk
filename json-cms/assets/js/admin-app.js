@@ -47,6 +47,14 @@
     } catch (_) {}
   }
 
+  async function dismissDraft(name) {
+    if (!name) return;
+    clearLocalDraft(name);
+    try {
+      await api("/api/drafts/" + encodeURIComponent(name), { method: "DELETE" });
+    } catch (_) {}
+  }
+
   function setDraftStatus(text, kind) {
     const el = $("#draft-status");
     if (!el) return;
@@ -111,7 +119,11 @@
     const best = candidates[0];
     const savedStr = JSON.stringify(savedData);
     const draftStr = JSON.stringify(best.data);
-    if (draftStr === savedStr) return null;
+    // Draft matches published content — clean it up and skip the prompt
+    if (draftStr === savedStr) {
+      await dismissDraft(name);
+      return null;
+    }
 
     const when = best.updatedAt ? new Date(best.updatedAt).toLocaleString() : "unknown time";
     const ok = await askConfirm({
@@ -122,7 +134,12 @@
       danger: false,
       icon: "↺",
     });
-    return ok ? best.data : null;
+    if (!ok) {
+      // User chose the saved version — drop leftover drafts so we don't ask again
+      await dismissDraft(name);
+      return null;
+    }
+    return best.data;
   }
 
   function getTheme() {
@@ -1076,7 +1093,7 @@
         }
       );
       state.snapshot = JSON.stringify(state.data);
-      clearLocalDraft(state.currentName);
+      await dismissDraft(state.currentName);
       setDirty(false);
       setDraftStatus(
         res.version ? "Published · history saved" : "Published",
