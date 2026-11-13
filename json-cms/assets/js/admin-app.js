@@ -8,7 +8,30 @@
     mode: "form", // form | raw
   };
 
+  const THEME_KEY = "cs-theme";
   const $ = (sel) => document.querySelector(sel);
+
+  function getTheme() {
+    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  }
+
+  function applyTheme(theme) {
+    const next = theme === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", next);
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch (_) {}
+    document.querySelectorAll("[data-theme-set]").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-theme-set") === next);
+    });
+  }
+
+  function initTheme() {
+    applyTheme(getTheme());
+    document.querySelectorAll("[data-theme-set]").forEach((btn) => {
+      btn.addEventListener("click", () => applyTheme(btn.getAttribute("data-theme-set")));
+    });
+  }
 
   async function api(path, options = {}) {
     const { headers: extraHeaders, ...rest } = options;
@@ -48,12 +71,16 @@
   function showLogin() {
     $("#login-view").hidden = false;
     $("#app-view").hidden = true;
+    const floatToggle = document.querySelector(".theme-toggle-float");
+    if (floatToggle) floatToggle.hidden = false;
   }
 
   function showApp() {
     $("#login-view").hidden = true;
     $("#app-view").hidden = false;
     $("#user-label").textContent = state.user || "admin";
+    const floatToggle = document.querySelector(".theme-toggle-float");
+    if (floatToggle) floatToggle.hidden = true;
   }
 
   async function checkAuth() {
@@ -327,5 +354,6 @@
     }
   });
 
+  initTheme();
   checkAuth();
 })();

@@ -5,12 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Content Studio</title>
   <meta name="robots" content="noindex" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("cs-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/admin.css" />
 </head>
 <body>
+  <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
+    <button type="button" data-theme-set="light" id="theme-light-login">Light</button>
+    <button type="button" data-theme-set="dark" id="theme-dark-login">Dark</button>
+  </div>
+
   <div id="login-view" class="login-view">
     <form id="login-form" class="login-card" autocomplete="on">
       <div class="brand-mark"><span class="dot"></span><strong>Content Studio</strong></div>
@@ -45,6 +63,10 @@
           <span id="dirty-dot" class="dirty-dot" hidden title="Unsaved changes"></span>
         </div>
         <div class="topbar-actions">
+          <div class="theme-toggle" role="group" aria-label="Theme">
+            <button type="button" data-theme-set="light" id="theme-light-app">Light</button>
+            <button type="button" data-theme-set="dark" id="theme-dark-app">Dark</button>
+          </div>
           <span id="user-label" class="user-chip"></span>
           <button type="button" class="btn btn-secondary btn-sm" id="btn-save">Save</button>
           <button type="button" class="btn btn-danger btn-sm" id="btn-delete">Delete</button>
