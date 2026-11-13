@@ -11,6 +11,8 @@
     draftTimer: null,
     lastDraftAt: null,
     autosaveBusy: false,
+    suppressDirty: false,
+    pendingDraft: null,
     studioSection: "content",
   };
 
@@ -99,7 +101,7 @@
     }
   }
 
-  async function maybeOfferDraft(name, savedData) {
+  async function findNewerDraft(name, savedData) {
     let serverDraft = null;
     try {
       const res = await api("/api/drafts/" + encodeURIComponent(name));
@@ -119,27 +121,55 @@
     const best = candidates[0];
     const savedStr = JSON.stringify(savedData);
     const draftStr = JSON.stringify(best.data);
-    // Draft matches published content — clean it up and skip the prompt
     if (draftStr === savedStr) {
       await dismissDraft(name);
       return null;
     }
+    return best;
+  }
 
-    const when = best.updatedAt ? new Date(best.updatedAt).toLocaleString() : "unknown time";
-    const ok = await askConfirm({
-      title: "Restore draft?",
-      message:
-        "A newer draft was found (" + best.source + ", " + when + "). Restore it instead of the last saved version?",
-      confirmText: "Restore draft",
-      danger: false,
-      icon: "↺",
-    });
-    if (!ok) {
-      // User chose the saved version — drop leftover drafts so we don't ask again
-      await dismissDraft(name);
-      return null;
+  function hideDraftBanner() {
+    const banner = $("#draft-banner");
+    if (banner) banner.hidden = true;
+    state.pendingDraft = null;
+  }
+
+  function showDraftBanner(draft) {
+    const banner = $("#draft-banner");
+    const text = $("#draft-banner-text");
+    if (!banner || !draft) {
+      hideDraftBanner();
+      return;
     }
-    return best.data;
+    state.pendingDraft = draft;
+    const when = draft.updatedAt ? new Date(draft.updatedAt).toLocaleString() : "unknown time";
+    if (text) text.textContent = "Newer " + draft.source + " draft from " + when + ".";
+    banner.hidden = false;
+  }
+
+  async function restorePendingDraft() {
+    if (!state.pendingDraft || !state.currentName) return;
+    const draft = state.pendingDraft;
+    const resolved = state.template;
+    let data = draft.data;
+    if (resolved && resolved.fields && window.ContentTemplates) {
+      data = ContentTemplates.applyDefaults(data, resolved);
+    }
+    if (resolved && data && !data._template) data._template = resolved.id;
+    state.data = data;
+    hideDraftBanner();
+    renderEditor();
+    setDirty(true);
+    setDraftStatus("Draft restored — save to publish", "warn");
+    toast("Draft restored", "ok");
+  }
+
+  async function dismissPendingDraft() {
+    const name = state.currentName;
+    hideDraftBanner();
+    if (name) await dismissDraft(name);
+    setDraftStatus("");
+    toast("Draft dismissed", "ok");
   }
 
   function getTheme() {
@@ -989,15 +1019,10 @@
       if (state.template && data && !data._template) {
         data._template = state.template.id;
       }
-      const draftData = await maybeOfferDraft(res.name, data);
-      if (draftData) {
-        data =
-          resolved && resolved.fields && window.ContentTemplates
-            ? ContentTemplates.applyDefaults(draftData, resolved)
-            : draftData;
-      }
+      // Always open the published version. Offer drafts via a non-blocking banner.
+      const newerDraft = await findNewerDraft(res.name, data);
       state.data = data;
-      state.dirty = !!draftData;
+      state.dirty = false;
       $("#editor-empty").hidden = true;
       $("#editor-panel").hidden = false;
       $("#current-file").textContent = prettyName(res.name);
@@ -1005,15 +1030,19 @@
       $("#public-url").href = "/content/" + res.name;
       $("#save-bar").hidden = false;
       $("#save-bar-file").textContent = prettyName(res.name);
-      state.snapshot = JSON.stringify(
-        resolved && resolved.fields && window.ContentTemplates
-          ? ContentTemplates.applyDefaults(res.data, resolved)
-          : res.data
-      );
+      state.snapshot = JSON.stringify(data);
       renderEditor();
       renderFileList();
-      setDirty(!!draftData);
-      setDraftStatus(draftData ? "Draft restored — save to publish" : "", draftData ? "warn" : "ok");
+      setDirty(false);
+      // Drop local noise from editor init; keep server draft only if banner needs it
+      clearLocalDraft(res.name);
+      if (newerDraft) {
+        showDraftBanner(newerDraft);
+        setDraftStatus("Draft available", "warn");
+      } else {
+        hideDraftBanner();
+        setDraftStatus("");
+      }
     } catch (e) {
       toast(e.message, "error");
     }
@@ -1035,10 +1064,31 @@
       btn.classList.toggle("is-pulse", dirty);
       btn.disabled = false;
     });
-    if (dirty) scheduleAutosave();
+    if (dirty) {
+      scheduleAutosave();
+    } else if (state.draftTimer) {
+      clearTimeout(state.draftTimer);
+      state.draftTimer = null;
+    }
+  }
+
+  function markEditorDirty(next) {
+    if (state.suppressDirty) {
+      state.data = next;
+      return;
+    }
+    state.data = next;
+    setDirty(true);
+    if (state.currentName) writeLocalDraft(state.currentName, next);
+    hideDraftBanner();
   }
 
   function renderEditor() {
+    state.suppressDirty = true;
+    if (state.draftTimer) {
+      clearTimeout(state.draftTimer);
+      state.draftTimer = null;
+    }
     if (state.mode === "raw") {
       $("#form-root").hidden = true;
       $("#raw-root").hidden = false;
@@ -1048,21 +1098,19 @@
       $("#form-root").hidden = false;
       FormEngine.render($("#form-root"), state.data, {
         template: state.template,
-        onChange: (next) => {
-          state.data = next;
-          setDirty(true);
-          writeLocalDraft(state.currentName, next);
-        },
+        onChange: (next) => markEditorDirty(next),
         onStructure: (next) => {
-          state.data = next;
-          setDirty(true);
-          writeLocalDraft(state.currentName, next);
-          renderEditor();
+          markEditorDirty(next);
+          if (!state.suppressDirty) renderEditor();
         },
       });
     }
     $("#tab-form").classList.toggle("active", state.mode === "form");
     $("#tab-raw").classList.toggle("active", state.mode === "raw");
+    // SunEditor can fire onChange asynchronously after setContents
+    setTimeout(() => {
+      state.suppressDirty = false;
+    }, 400);
   }
 
   async function saveFile() {
@@ -1474,5 +1522,9 @@
   bindMediaUi();
   bindSidebarUi();
   bindConfirmUi();
+  const draftRestoreBtn = $("#draft-banner-restore");
+  const draftDismissBtn = $("#draft-banner-dismiss");
+  if (draftRestoreBtn) draftRestoreBtn.addEventListener("click", () => restorePendingDraft());
+  if (draftDismissBtn) draftDismissBtn.addEventListener("click", () => dismissPendingDraft());
   checkAuth();
 })();
