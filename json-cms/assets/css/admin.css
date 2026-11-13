@@ -754,7 +754,77 @@ a {
 }
 
 .sidebar-toggle {
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-elev);
+  color: var(--text);
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar-toggle:hover {
+  background: var(--bg-panel);
+  border-color: var(--line-strong);
+}
+
+.sidebar-toggle .hb {
+  position: relative;
+  width: 18px;
+  height: 14px;
+  display: block;
+}
+
+.sidebar-toggle .hb i {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.2s ease, opacity 0.2s ease, top 0.2s ease;
+}
+
+.sidebar-toggle .hb i:nth-child(1) { top: 0; }
+.sidebar-toggle .hb i:nth-child(2) { top: 6px; }
+.sidebar-toggle .hb i:nth-child(3) { top: 12px; }
+
+.sidebar-toggle.is-active .hb i:nth-child(1),
+.sidebar-toggle .hb.is-close i:nth-child(1) {
+  top: 6px;
+  transform: rotate(45deg);
+}
+
+.sidebar-toggle.is-active .hb i:nth-child(2),
+.sidebar-toggle .hb.is-close i:nth-child(2) {
+  opacity: 0;
+}
+
+.sidebar-toggle.is-active .hb i:nth-child(3),
+.sidebar-toggle .hb.is-close i:nth-child(3) {
+  top: 6px;
+  transform: rotate(-45deg);
+}
+
+.sidebar-toggle-in {
+  width: 34px;
+  height: 34px;
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: 0 1fr;
+}
+
+.app-shell.sidebar-collapsed .sidebar {
+  visibility: hidden;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .sidebar-backdrop {
@@ -2158,10 +2228,13 @@ html, body {
     grid-template-columns: 1fr;
   }
 
-  .sidebar-toggle {
-    display: inline-flex;
-    align-items: center;
-    flex: 0 0 auto;
+  .app-shell.sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell.sidebar-collapsed .sidebar {
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .sidebar {
@@ -2178,6 +2251,7 @@ html, body {
     max-height: none;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+    visibility: visible;
   }
 
   .app-shell.sidebar-open .sidebar {

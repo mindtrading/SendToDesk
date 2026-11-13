@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=14" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=15" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -162,9 +162,12 @@
   </div>
 
   <div id="app-view" class="app-shell" hidden>
-    <aside class="sidebar">
+    <aside class="sidebar" id="studio-sidebar">
       <div class="side-head">
         <h2>Content Studio</h2>
+        <button type="button" class="sidebar-toggle sidebar-toggle-in" id="btn-sidebar-close" aria-label="Hide sidebar" title="Hide sidebar">
+          <span class="hb is-close" aria-hidden="true"><i></i><i></i><i></i></span>
+        </button>
       </div>
       <nav class="side-nav" aria-label="Studio sections">
         <button type="button" class="side-nav-btn is-active" id="nav-content" data-studio="content">Content</button>
@@ -190,7 +193,9 @@
     <section class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <button type="button" class="btn btn-secondary btn-sm sidebar-toggle" id="btn-sidebar" aria-label="Open menu" aria-expanded="false">Menu</button>
+          <button type="button" class="sidebar-toggle" id="btn-sidebar" aria-label="Toggle sidebar" aria-expanded="true" title="Toggle sidebar">
+            <span class="hb" aria-hidden="true"><i></i><i></i><i></i></span>
+          </button>
           <h1 id="current-file">Content Studio</h1>
           <span id="dirty-dot" class="dirty-dot" hidden title="Unsaved changes"></span>
         </div>
@@ -319,6 +324,6 @@
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
   <script src="assets/js/form-engine.js?v=14"></script>
-  <script src="assets/js/admin-app.js?v=15"></script>
+  <script src="assets/js/admin-app.js?v=16"></script>
 </body>
 </html>

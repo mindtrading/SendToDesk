@@ -493,34 +493,70 @@
     }
   }
 
+  function isMobileNav() {
+    return window.innerWidth <= 900;
+  }
+
+  function isSidebarVisible() {
+    const shell = $("#app-view");
+    if (!shell) return true;
+    if (isMobileNav()) return shell.classList.contains("sidebar-open");
+    return !shell.classList.contains("sidebar-collapsed");
+  }
+
   function setSidebarOpen(open) {
     const shell = $("#app-view");
     const btn = $("#btn-sidebar");
     const backdrop = $("#sidebar-backdrop");
     if (!shell) return;
-    shell.classList.toggle("sidebar-open", !!open);
-    if (btn) {
-      btn.setAttribute("aria-expanded", open ? "true" : "false");
-      btn.textContent = open ? "Close" : "Menu";
+    if (isMobileNav()) {
+      shell.classList.toggle("sidebar-open", !!open);
+      shell.classList.remove("sidebar-collapsed");
+      if (backdrop) backdrop.hidden = !open;
+    } else {
+      shell.classList.toggle("sidebar-collapsed", !open);
+      shell.classList.remove("sidebar-open");
+      if (backdrop) backdrop.hidden = true;
+      try {
+        localStorage.setItem("cs-sidebar", open ? "open" : "collapsed");
+      } catch (_) {}
     }
-    if (backdrop) backdrop.hidden = !open;
+    document.querySelectorAll(".sidebar-toggle").forEach((el) => {
+      el.classList.toggle("is-active", !!open);
+      el.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    if (btn) btn.title = open ? "Hide sidebar" : "Show sidebar";
   }
 
   function bindSidebarUi() {
     const btn = $("#btn-sidebar");
+    const closeBtn = $("#btn-sidebar-close");
     const backdrop = $("#sidebar-backdrop");
-    if (btn) {
-      btn.addEventListener("click", () => {
-        const shell = $("#app-view");
-        setSidebarOpen(!(shell && shell.classList.contains("sidebar-open")));
-      });
-    }
-    if (backdrop) {
-      backdrop.addEventListener("click", () => setSidebarOpen(false));
-    }
+    const toggle = () => setSidebarOpen(!isSidebarVisible());
+    if (btn) btn.addEventListener("click", toggle);
+    if (closeBtn) closeBtn.addEventListener("click", () => setSidebarOpen(false));
+    if (backdrop) backdrop.addEventListener("click", () => setSidebarOpen(false));
     window.addEventListener("resize", () => {
-      if (window.innerWidth > 900) setSidebarOpen(false);
+      if (isMobileNav()) {
+        setSidebarOpen(false);
+      } else {
+        let prefer = "open";
+        try {
+          prefer = localStorage.getItem("cs-sidebar") || "open";
+        } catch (_) {}
+        setSidebarOpen(prefer !== "collapsed");
+      }
     });
+    // desktop restore
+    if (!isMobileNav()) {
+      let prefer = "open";
+      try {
+        prefer = localStorage.getItem("cs-sidebar") || "open";
+      } catch (_) {}
+      setSidebarOpen(prefer !== "collapsed");
+    } else {
+      setSidebarOpen(false);
+    }
   }
 
   function bindMediaUi() {
