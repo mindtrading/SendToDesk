@@ -22,6 +22,13 @@ import {
   writeDraft,
   deleteDraft,
 } from "../shared/r2.js";
+import {
+  readInstall,
+  writeInstall,
+  buildSiteSettings,
+  packCatalog,
+  buildPackData,
+} from "../shared/setup.js";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -267,7 +274,128 @@ export async function onRequest(context) {
     return handleDrafts(request, env, segs.slice(1), method);
   }
 
+  if (head === "setup") {
+    return handleSetup(request, env, segs.slice(1), method);
+  }
+
   return json({ error: "Not found", path: segs.join("/") }, 404);
+}
+
+async function handleSetup(request, env, parts, method) {
+  const user = await requireUser(request, env);
+  if (!user) return json({ error: "Unauthorized" }, 401);
+
+  const bindingOk = Boolean(env.CONTENT);
+  if (!bindingOk) {
+    return json({
+      needsSetup: true,
+      installed: false,
+      bindingOk: false,
+      fileCount: 0,
+      packs: packCatalog(),
+      error: "R2 binding CONTENT missing",
+    });
+  }
+
+  // GET /api/setup
+  if ((!parts.length || parts[0] === "status") && method === "GET") {
+    try {
+      const install = await readInstall(env.CONTENT);
+      const files = await listJsonFiles(env.CONTENT);
+      const fileCount = files.length;
+      const installed = Boolean(install);
+      const needsSetup = !installed && fileCount === 0;
+      return json({
+        needsSetup,
+        installed,
+        bindingOk: true,
+        fileCount,
+        install,
+        packs: packCatalog(),
+        publicBase: "/content/",
+      });
+    } catch (e) {
+      return json({ error: e.message || "Setup status failed" }, 500);
+    }
+  }
+
+  // POST /api/setup  — run wizard install
+  if ((!parts.length || parts[0] === "install") && method === "POST") {
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: "Invalid JSON body" }, 400);
+    }
+
+    try {
+      const existingInstall = await readInstall(env.CONTENT);
+      if (existingInstall && !body.force) {
+        return json({ error: "Already installed", install: existingInstall }, 409);
+      }
+
+      const site = buildSiteSettings(body);
+      const created = [];
+
+      const settingsKey = normalizeKey("site-settings.json");
+      await writeJson(env.CONTENT, settingsKey, site);
+      created.push("site-settings.json");
+
+      const wanted = Array.isArray(body.packs) ? body.packs : ["blog", "faq", "pages"];
+      const catalog = packCatalog();
+      for (const pack of catalog) {
+        if (!wanted.includes(pack.id)) continue;
+        const data = buildPackData(pack.id, site);
+        if (!data) continue;
+        const key = normalizeKey(pack.file);
+        const headObj = await env.CONTENT.head(key);
+        if (headObj && !body.overwrite) {
+          // keep existing file, still count as present
+          created.push(pack.file + " (kept)");
+          continue;
+        }
+        await writeJson(env.CONTENT, key, data);
+        created.push(pack.file);
+      }
+
+      const install = await writeInstall(env.CONTENT, {
+        completedAt: new Date().toISOString(),
+        completedBy: user,
+        siteName: site.siteName,
+        packs: wanted,
+        files: created,
+      });
+
+      return json({
+        ok: true,
+        install,
+        created,
+        site,
+        publicUrl: "/content/site-settings.json",
+      });
+    } catch (e) {
+      return json({ error: e.message || "Install failed" }, 500);
+    }
+  }
+
+  // POST /api/setup/skip — mark installed without seeding
+  if (parts[0] === "skip" && method === "POST") {
+    try {
+      const install = await writeInstall(env.CONTENT, {
+        completedAt: new Date().toISOString(),
+        completedBy: user,
+        skipped: true,
+        siteName: null,
+        packs: [],
+        files: [],
+      });
+      return json({ ok: true, install });
+    } catch (e) {
+      return json({ error: e.message || "Skip failed" }, 500);
+    }
+  }
+
+  return json({ error: "Not found" }, 404);
 }
 
 async function handleVersions(request, env, parts, method) {

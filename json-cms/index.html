@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=9" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=10" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -42,6 +42,123 @@
       </div>
       <p id="login-error" class="error" hidden></p>
     </form>
+  </div>
+
+  <div id="setup-view" class="setup-view" hidden>
+    <div class="setup-shell">
+      <aside class="setup-rail">
+        <div class="brand-mark"><span class="dot"></span><strong>Content Studio</strong></div>
+        <h2 class="setup-rail-title">First-time setup</h2>
+        <p class="setup-rail-sub">A short wizard prepares your live JSON content in R2.</p>
+        <ol class="setup-steps" id="setup-steps" aria-label="Setup steps">
+          <li data-step="1" class="is-active"><span>1</span> Welcome</li>
+          <li data-step="2"><span>2</span> Site</li>
+          <li data-step="3"><span>3</span> Downloads</li>
+          <li data-step="4"><span>4</span> Content</li>
+          <li data-step="5"><span>5</span> Finish</li>
+        </ol>
+      </aside>
+
+      <section class="setup-main">
+        <div class="setup-progress" aria-hidden="true"><i id="setup-progress-bar"></i></div>
+
+        <div class="setup-panel" data-panel="1">
+          <p class="setup-kicker">Step 1 of 5</p>
+          <h1>Welcome — let’s install Content Studio</h1>
+          <p class="setup-lead">After login, this wizard creates your first live JSON files. Your public site can fetch them from <code>/content/</code>.</p>
+          <ul class="setup-checklist" id="setup-checks">
+            <li data-check="auth">Signed in</li>
+            <li data-check="r2">R2 storage connected</li>
+            <li data-check="empty">Ready for first content</li>
+          </ul>
+          <div class="setup-actions">
+            <button type="button" class="btn" id="setup-next-1">Continue</button>
+            <button type="button" class="btn btn-ghost" id="setup-skip">Skip for now</button>
+          </div>
+        </div>
+
+        <div class="setup-panel" data-panel="2" hidden>
+          <p class="setup-kicker">Step 2 of 5</p>
+          <h1>Your site</h1>
+          <p class="setup-lead">These values go into <strong>site-settings.json</strong> and power the public homepage.</p>
+          <div class="setup-form">
+            <label class="c-label" for="setup-site-name">Site name</label>
+            <input id="setup-site-name" class="input" value="SendToDesk" />
+            <label class="c-label" for="setup-tagline">Tagline</label>
+            <input id="setup-tagline" class="input" value="Phone to Windows PC over Wi‑Fi" />
+            <label class="c-label" for="setup-email">Support email</label>
+            <input id="setup-email" class="input" type="email" value="mindtradingapp@gmail.com" />
+            <label class="c-label" for="setup-theme">Theme color</label>
+            <div class="setup-color-row">
+              <input id="setup-theme" class="input" type="color" value="#0f766e" />
+              <span class="muted" id="setup-theme-label">#0f766e</span>
+            </div>
+            <label class="c-label" for="setup-hero-title">Hero title</label>
+            <input id="setup-hero-title" class="input" value="The fast way from phone to PC" />
+            <label class="c-label" for="setup-hero-sub">Hero subtitle</label>
+            <textarea id="setup-hero-sub" class="input textarea setup-textarea">Scan a document or make a passport photo on Android. Send it to Windows over the same Wi‑Fi — no cloud.</textarea>
+          </div>
+          <div class="setup-actions">
+            <button type="button" class="btn btn-secondary" id="setup-back-2">Back</button>
+            <button type="button" class="btn" id="setup-next-2">Continue</button>
+          </div>
+        </div>
+
+        <div class="setup-panel" data-panel="3" hidden>
+          <p class="setup-kicker">Step 3 of 5</p>
+          <h1>Download links</h1>
+          <p class="setup-lead">Used by the public site for Windows zip and Play Store buttons.</p>
+          <div class="setup-form">
+            <label class="c-label" for="setup-version">App version</label>
+            <input id="setup-version" class="input" value="1.0.0" />
+            <label class="c-label" for="setup-windows">Windows download URL</label>
+            <input id="setup-windows" class="input" type="url" placeholder="https://…/SendToDesk.zip" value="https://pub-39a92e5168a84fd6a714627aef76b5f1.r2.dev/SendToDesk_1.0.zip" />
+            <label class="c-label" for="setup-play">Play Store URL</label>
+            <input id="setup-play" class="input" type="url" value="https://play.google.com/store/apps/details?id=com.docs.scan.sendtodesk" />
+            <label class="c-label" for="setup-cta">Primary button label</label>
+            <input id="setup-cta" class="input" value="Download now" />
+          </div>
+          <div class="setup-actions">
+            <button type="button" class="btn btn-secondary" id="setup-back-3">Back</button>
+            <button type="button" class="btn" id="setup-next-3">Continue</button>
+          </div>
+        </div>
+
+        <div class="setup-panel" data-panel="4" hidden>
+          <p class="setup-kicker">Step 4 of 5</p>
+          <h1>Starter content</h1>
+          <p class="setup-lead">Pick packs to create now. You can always add more later with <strong>New content</strong>.</p>
+          <div class="setup-packs" id="setup-packs"></div>
+          <div class="setup-actions">
+            <button type="button" class="btn btn-secondary" id="setup-back-4">Back</button>
+            <button type="button" class="btn" id="setup-next-4">Review &amp; install</button>
+          </div>
+        </div>
+
+        <div class="setup-panel" data-panel="5" hidden>
+          <p class="setup-kicker">Step 5 of 5</p>
+          <h1 id="setup-finish-title">Ready to install</h1>
+          <p class="setup-lead" id="setup-finish-lead">We’ll write live JSON into R2 and mark setup complete.</p>
+          <div class="setup-review" id="setup-review"></div>
+          <div class="setup-install-status" id="setup-install-status" hidden>
+            <div class="setup-spinner" aria-hidden="true"></div>
+            <p id="setup-install-msg">Creating content…</p>
+          </div>
+          <div class="setup-done" id="setup-done" hidden>
+            <p class="setup-done-badge">Installed</p>
+            <p>Open <code>/content/site-settings.json</code> on your public site — it’s live.</p>
+          </div>
+          <div class="setup-actions" id="setup-finish-actions">
+            <button type="button" class="btn btn-secondary" id="setup-back-5">Back</button>
+            <button type="button" class="btn" id="setup-install">Install now</button>
+          </div>
+          <div class="setup-actions" id="setup-enter-actions" hidden>
+            <button type="button" class="btn" id="setup-enter">Open Content Studio</button>
+          </div>
+          <p id="setup-error" class="error" hidden></p>
+        </div>
+      </section>
+    </div>
   </div>
 
   <div id="app-view" class="app-shell" hidden>
@@ -149,6 +266,6 @@
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
   <script src="assets/js/form-engine.js?v=11"></script>
-  <script src="assets/js/admin-app.js?v=11"></script>
+  <script src="assets/js/admin-app.js?v=12"></script>
 </body>
 </html>

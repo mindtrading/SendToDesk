@@ -176,8 +176,16 @@
     toast._timer = setTimeout(() => t.classList.remove("show"), 2800);
   }
 
+  const setupState = {
+    step: 1,
+    packs: [],
+    status: null,
+  };
+
   function showLogin() {
     $("#login-view").hidden = false;
+    const setup = $("#setup-view");
+    if (setup) setup.hidden = true;
     $("#app-view").hidden = true;
     const floatToggle = document.querySelector(".theme-toggle-float");
     if (floatToggle) floatToggle.hidden = false;
@@ -187,18 +195,264 @@
 
   function showApp() {
     $("#login-view").hidden = true;
+    const setup = $("#setup-view");
+    if (setup) setup.hidden = true;
     $("#app-view").hidden = false;
     $("#user-label").textContent = state.user || "admin";
     const floatToggle = document.querySelector(".theme-toggle-float");
     if (floatToggle) floatToggle.hidden = true;
   }
 
+  function showSetup() {
+    $("#login-view").hidden = true;
+    $("#app-view").hidden = true;
+    const setup = $("#setup-view");
+    if (setup) setup.hidden = false;
+    const floatToggle = document.querySelector(".theme-toggle-float");
+    if (floatToggle) floatToggle.hidden = false;
+    const saveBar = $("#save-bar");
+    if (saveBar) saveBar.hidden = true;
+    goSetupStep(1);
+  }
+
+  function goSetupStep(step) {
+    setupState.step = step;
+    document.querySelectorAll(".setup-panel").forEach((panel) => {
+      panel.hidden = Number(panel.getAttribute("data-panel")) !== step;
+    });
+    document.querySelectorAll("#setup-steps li").forEach((li) => {
+      const n = Number(li.getAttribute("data-step"));
+      li.classList.toggle("is-active", n === step);
+      li.classList.toggle("is-done", n < step);
+    });
+    const bar = $("#setup-progress-bar");
+    if (bar) bar.style.width = (step / 5) * 100 + "%";
+    if (step === 4) renderSetupPacks();
+    if (step === 5) renderSetupReview();
+  }
+
+  function renderSetupPacks() {
+    const root = $("#setup-packs");
+    if (!root) return;
+    const packs = (setupState.status && setupState.status.packs) || [
+      { id: "blog", label: "Blog", description: "Posts with HTML body" },
+      { id: "faq", label: "FAQ", description: "Questions and answers" },
+      { id: "pages", label: "Pages", description: "Static pages" },
+      { id: "ads", label: "Ads", description: "Ad slots" },
+      { id: "team", label: "Team", description: "Team members" },
+    ];
+    const selected = new Set(
+      setupState.packs.length ? setupState.packs : ["blog", "faq", "pages"]
+    );
+    root.innerHTML = packs
+      .map((p) => {
+        const checked = selected.has(p.id) ? "checked" : "";
+        return (
+          '<label class="setup-pack">' +
+          '<input type="checkbox" name="setup-pack" value="' +
+          escapeHtml(p.id) +
+          '" ' +
+          checked +
+          " />" +
+          "<div><strong>" +
+          escapeHtml(p.label) +
+          "</strong><span>" +
+          escapeHtml(p.description || "") +
+          "</span></div></label>"
+        );
+      })
+      .join("");
+  }
+
+  function selectedPacks() {
+    return Array.from(document.querySelectorAll('input[name="setup-pack"]:checked')).map(
+      (el) => el.value
+    );
+  }
+
+  function collectSetupPayload() {
+    setupState.packs = selectedPacks();
+    return {
+      siteName: ($("#setup-site-name") && $("#setup-site-name").value.trim()) || "My Site",
+      tagline: ($("#setup-tagline") && $("#setup-tagline").value.trim()) || "",
+      supportEmail: ($("#setup-email") && $("#setup-email").value.trim()) || "",
+      themeColor: ($("#setup-theme") && $("#setup-theme").value) || "#1d4ed8",
+      heroTitle: ($("#setup-hero-title") && $("#setup-hero-title").value.trim()) || "",
+      heroSubtitle: ($("#setup-hero-sub") && $("#setup-hero-sub").value.trim()) || "",
+      ctaLabel: ($("#setup-cta") && $("#setup-cta").value.trim()) || "Download now",
+      version: ($("#setup-version") && $("#setup-version").value.trim()) || "1.0.0",
+      windowsUrl: ($("#setup-windows") && $("#setup-windows").value.trim()) || "",
+      playStoreUrl: ($("#setup-play") && $("#setup-play").value.trim()) || "",
+      packs: setupState.packs,
+      overwrite: true,
+    };
+  }
+
+  function renderSetupReview() {
+    const payload = collectSetupPayload();
+    const root = $("#setup-review");
+    if (!root) return;
+    const rows = [
+      ["Site", payload.siteName],
+      ["Email", payload.supportEmail || "—"],
+      ["Version", payload.version],
+      ["Packs", payload.packs.length ? payload.packs.join(", ") : "settings only"],
+      ["Live file", "/content/site-settings.json"],
+    ];
+    root.innerHTML = rows
+      .map(
+        (r) =>
+          "<div><span class=\"k\">" +
+          escapeHtml(r[0]) +
+          "</span><span class=\"v\">" +
+          escapeHtml(r[1]) +
+          "</span></div>"
+      )
+      .join("");
+    const title = $("#setup-finish-title");
+    const lead = $("#setup-finish-lead");
+    if (title) title.textContent = "Ready to install";
+    if (lead) {
+      lead.textContent =
+        "We’ll write live JSON into R2 and mark setup complete.";
+    }
+    const status = $("#setup-install-status");
+    const done = $("#setup-done");
+    const finish = $("#setup-finish-actions");
+    const enter = $("#setup-enter-actions");
+    const err = $("#setup-error");
+    if (status) status.hidden = true;
+    if (done) done.hidden = true;
+    if (finish) finish.hidden = false;
+    if (enter) enter.hidden = true;
+    if (err) err.hidden = true;
+  }
+
+  function updateSetupChecks(status) {
+    const map = {
+      auth: true,
+      r2: status && status.bindingOk,
+      empty: status && status.needsSetup,
+    };
+    document.querySelectorAll("#setup-checks [data-check]").forEach((li) => {
+      const key = li.getAttribute("data-check");
+      li.classList.toggle("is-ok", Boolean(map[key]));
+      li.classList.toggle("is-bad", map[key] === false);
+    });
+  }
+
+  async function maybeStartSetup() {
+    try {
+      const status = await api("/api/setup");
+      setupState.status = status;
+      if (status.needsSetup) {
+        showSetup();
+        updateSetupChecks(status);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      toast(e.message || "Setup check failed", "error");
+      return false;
+    }
+  }
+
+  async function runInstall() {
+    const payload = collectSetupPayload();
+    const statusEl = $("#setup-install-status");
+    const msg = $("#setup-install-msg");
+    const finish = $("#setup-finish-actions");
+    const enter = $("#setup-enter-actions");
+    const done = $("#setup-done");
+    const err = $("#setup-error");
+    if (err) err.hidden = true;
+    if (finish) finish.hidden = true;
+    if (statusEl) statusEl.hidden = false;
+    if (msg) msg.textContent = "Creating content in R2…";
+    try {
+      const res = await api("/api/setup", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      if (msg) msg.textContent = "Installed " + (res.created || []).length + " files";
+      if (statusEl) statusEl.hidden = true;
+      if (done) done.hidden = false;
+      if (enter) enter.hidden = false;
+      const title = $("#setup-finish-title");
+      if (title) title.textContent = "You're all set";
+      toast("Setup complete", "ok");
+    } catch (e) {
+      if (statusEl) statusEl.hidden = true;
+      if (finish) finish.hidden = false;
+      if (err) {
+        err.textContent = e.message || "Install failed";
+        err.hidden = false;
+      }
+    }
+  }
+
+  async function skipSetup() {
+    try {
+      await api("/api/setup/skip", { method: "POST", body: "{}" });
+    } catch (_) {}
+    showApp();
+    await refreshFiles();
+  }
+
+  async function enterAfterSetup() {
+    showApp();
+    await refreshFiles();
+    if (state.files.some((f) => f.name === "site-settings.json")) {
+      openFile("site-settings.json").catch(() => {});
+    }
+  }
+
+  function bindSetupUi() {
+    if (!$("#setup-view")) return;
+    const next = (from, to) => {
+      const btn = $("#setup-next-" + from);
+      if (btn) btn.addEventListener("click", () => goSetupStep(to));
+    };
+    const back = (from, to) => {
+      const btn = $("#setup-back-" + from);
+      if (btn) btn.addEventListener("click", () => goSetupStep(to));
+    };
+    next(1, 2);
+    next(2, 3);
+    next(3, 4);
+    next(4, 5);
+    back(2, 1);
+    back(3, 2);
+    back(4, 3);
+    back(5, 4);
+    const skip = $("#setup-skip");
+    if (skip) skip.addEventListener("click", () => skipSetup());
+    const install = $("#setup-install");
+    if (install) install.addEventListener("click", () => runInstall());
+    const enter = $("#setup-enter");
+    if (enter) enter.addEventListener("click", () => enterAfterSetup());
+    const theme = $("#setup-theme");
+    const themeLabel = $("#setup-theme-label");
+    if (theme && themeLabel) {
+      theme.addEventListener("input", () => {
+        themeLabel.textContent = theme.value;
+      });
+    }
+  }
+
+  async function afterAuth() {
+    const started = await maybeStartSetup();
+    if (!started) {
+      showApp();
+      await refreshFiles();
+    }
+  }
+
   async function checkAuth() {
     try {
       const me = await api("/api/me");
       state.user = me.user;
-      showApp();
-      await refreshFiles();
+      await afterAuth();
     } catch {
       showLogin();
     }
@@ -611,10 +865,10 @@
         body: JSON.stringify({ username, password }),
       });
       state.user = res.user;
-      showApp();
       try {
-        await refreshFiles();
+        await afterAuth();
       } catch (listErr) {
+        showApp();
         toast(listErr.message || "Could not load files", "error");
       }
     } catch (err) {
@@ -706,5 +960,6 @@
   });
 
   initTheme();
+  bindSetupUi();
   checkAuth();
 })();
