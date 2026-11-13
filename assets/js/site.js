@@ -347,7 +347,6 @@
       '<div class="blog-body">' +
       (post.body || "") +
       "</div>" +
-      '<div class="blog-article-foot"><a class="blog-back" href="./">← All posts</a></div>' +
       "</article>" +
       '<aside class="blog-aside">' +
       '<div class="blog-cta-card">' +

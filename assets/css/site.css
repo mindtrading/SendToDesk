@@ -828,18 +828,6 @@ img { max-width: 100%; display: block; }
 .blog-body a:hover { color: var(--teal); }
 .blog-body img { border-radius: 12px; margin: 18px 0; }
 .blog-body strong { color: var(--ink); }
-.blog-article-foot {
-  margin-top: 36px;
-  padding-top: 22px;
-  border-top: 1px solid var(--line);
-}
-.blog-back {
-  font-weight: 700;
-  color: var(--text);
-  text-decoration: none;
-}
-.blog-back:hover { color: var(--teal); }
-
 .blog-aside {
   position: sticky;
   top: calc(var(--nav) + 18px);
