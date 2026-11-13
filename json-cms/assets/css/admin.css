@@ -347,34 +347,73 @@ a {
 }
 
 .side-credit {
-  padding: 2px 4px 2px 12px;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px 12px 11px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(135deg, var(--accent-soft), transparent 42%),
+    var(--bg-soft);
+  position: relative;
+  overflow: hidden;
 }
 
-.side-credit-label {
-  font-size: 0.68rem;
-  font-weight: 650;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
+.side-credit::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--accent);
   opacity: 0.85;
 }
 
-.side-credit-brand {
+.side-credit-mark {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  flex-shrink: 0;
+}
+
+.side-credit-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.side-credit-by {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.side-credit-by strong {
+  display: inline;
   font-size: 0.92rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
-  line-height: 1.2;
 }
 
 .side-credit-copy {
-  font-size: 0.75rem;
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--muted);
-  line-height: 1.35;
-  margin-top: 2px;
+  line-height: 1.4;
+  opacity: 0.92;
 }
 
 .side-logout {
