@@ -19,6 +19,11 @@
   box-sizing: border-box;
 }
 
+/* display:grid on panels overrides the UA [hidden] rule without this */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
