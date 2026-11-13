@@ -351,13 +351,20 @@
       "</article>" +
       '<aside class="blog-aside">' +
       '<div class="blog-cta-card">' +
-      "<h2>Move files the fast way</h2>" +
-      "<p>Scan on Android. Send to Windows over the same Wi‑Fi — no cloud upload.</p>" +
+      '<div class="blog-cta-media">' +
+      '<img src="' +
+      escapeHtml(rootHref("assets/img/blog-cta-banner.jpg")) +
+      '" alt="Send files between phone and PC with SendToDesk" width="600" height="450" loading="lazy" />' +
+      "</div>" +
+      '<div class="blog-cta-copy">' +
+      "<h2>Phone to PC. PC to phone.</h2>" +
+      "<p>Scan a document or pick a file — send over Wi‑Fi in one tap. No cloud upload.</p>" +
       '<a class="blog-cta-btn" href="' +
       escapeHtml(rootHref("#download")) +
       '">' +
-      escapeHtml(ctaLabel) +
+      escapeHtml(ctaLabel || "Download now") +
       "</a>" +
+      "</div>" +
       "</div>" +
       '<div class="blog-recent">' +
       "<h3>Recent Posts</h3>" +
