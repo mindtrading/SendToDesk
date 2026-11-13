@@ -1094,3 +1094,70 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== SunEditor integration ===== */
+.sun-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+.sun-wrap .sun-editor {
+  border: 1px solid var(--line) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  font-family: var(--font);
+  background: var(--bg-elev) !important;
+}
+
+.sun-wrap .se-toolbar {
+  background: var(--bg-soft) !important;
+  border-bottom: 1px solid var(--line) !important;
+  outline: none !important;
+}
+
+.sun-wrap .se-btn {
+  color: var(--text) !important;
+}
+
+.sun-wrap .se-btn:enabled:hover {
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+  border-color: transparent !important;
+}
+
+.sun-wrap .se-wrapper,
+.sun-wrap .se-wrapper-inner,
+.sun-wrap .se-wrapper-wysiwyg {
+  background: var(--bg-elev) !important;
+}
+
+.sun-wrap .se-wrapper .se-wrapper-inner .se-wrapper-wysiwyg {
+  color: var(--text) !important;
+}
+
+.sun-wrap .sun-editor-editable {
+  background: var(--bg-elev) !important;
+  color: var(--text) !important;
+  font-family: var(--font) !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  padding: 14px 16px !important;
+}
+
+.sun-wrap .sun-editor-editable p {
+  margin: 0 0 0.75em;
+}
+
+.sun-wrap .se-resizing-bar {
+  background: var(--bg-soft) !important;
+  border-top: 1px solid var(--line) !important;
+}
+
+.sun-wrap .se-dialog .se-dialog-inner {
+  background: var(--bg-elev);
+  color: var(--text);
+}
+
+html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
+  color: var(--accent);
+}

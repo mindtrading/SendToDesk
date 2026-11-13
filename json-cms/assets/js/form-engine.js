@@ -12,6 +12,66 @@
   const META_KEYS = /^(id|slug|key|uid)$/i;
 
   const expandedCards = new Set();
+  let activeEditors = [];
+
+  function destroyRichEditors() {
+    activeEditors.forEach((ed) => {
+      try {
+        ed.destroy();
+      } catch (_) {}
+    });
+    activeEditors = [];
+  }
+
+  function sunEditorOptions(onInput) {
+    return {
+      height: "280px",
+      minHeight: "200px",
+      width: "100%",
+      placeholder: "Write your content here…",
+      resizingBar: true,
+      buttonList: [
+        ["undo", "redo"],
+        ["fontSize", "formatBlock"],
+        ["bold", "underline", "italic", "strike", "removeFormat"],
+        ["fontColor", "hiliteColor"],
+        ["align", "list", "indent", "outdent"],
+        ["link", "image", "video", "table"],
+        ["blockquote", "horizontalRule"],
+        ["codeView", "fullScreen", "preview"],
+      ],
+      formats: ["p", "blockquote", "h1", "h2", "h3", "h4"],
+      fontSize: [12, 14, 16, 18, 20, 24, 32],
+      imageAccept: ".jpg, .jpeg, .png, .gif, .webp",
+      imageUrlInput: true,
+      linkTargetNewWindow: true,
+      stickyToolbar: "transparent",
+      callBackSave: function (contents) {
+        if (typeof onInput === "function") onInput(contents);
+      },
+      onChange: function (contents) {
+        if (typeof onInput === "function") onInput(contents);
+      },
+    };
+  }
+
+  function mountRichEditors(root) {
+    if (!root || !window.SUNEDITOR) return;
+    root.querySelectorAll("textarea.sun-target").forEach((ta) => {
+      if (ta.getAttribute("data-sun-ready") === "1") return;
+      ta.setAttribute("data-sun-ready", "1");
+      const onInput = ta._csOnInput;
+      try {
+        const editor = window.SUNEDITOR.create(ta, sunEditorOptions(onInput));
+        if (ta.value) editor.setContents(ta.value);
+        activeEditors.push(editor);
+      } catch (err) {
+        console.warn("SunEditor init failed", err);
+        ta.classList.add("input", "textarea", "html-editor");
+        ta.addEventListener("input", () => onInput && onInput(ta.value));
+      }
+    });
+  }
 
   function labelFromKey(key) {
     return String(key)
@@ -123,62 +183,23 @@
     return null;
   }
 
-  function wrapHtmlTag(textarea, before, after) {
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const val = textarea.value;
-    const selected = val.slice(start, end) || "text";
-    const next = val.slice(0, start) + before + selected + after + val.slice(end);
-    textarea.value = next;
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-    textarea.focus();
-    const pos = start + before.length + selected.length + after.length;
-    textarea.setSelectionRange(pos, pos);
-  }
-
   function htmlEditor(value, onInput) {
+    const wrap = el("div", { className: "html-editor-wrap sun-wrap" });
     const ta = el("textarea", {
-      className: "input textarea html-editor",
+      className: "sun-target",
       rows: "10",
-      spellcheck: "true",
-      placeholder: "Write your content here (HTML supported)…",
-      onInput: (e) => onInput(e.target.value),
     });
     ta.value = value || "";
+    ta._csOnInput = onInput;
+    wrap.appendChild(ta);
 
-    const preview = el("div", { className: "html-preview", hidden: true });
-    const frame = el("iframe", {
-      className: "html-preview-frame",
-      sandbox: "",
-      title: "Preview",
-    });
-    preview.appendChild(frame);
+    if (!window.SUNEDITOR) {
+      ta.className = "input textarea html-editor";
+      ta.placeholder = "Write your content here (HTML supported)…";
+      ta.addEventListener("input", () => onInput(ta.value));
+    }
 
-    const toolbar = el("div", { className: "html-toolbar" }, [
-      el("button", { type: "button", className: "tool-btn", text: "B", title: "Bold", onClick: () => wrapHtmlTag(ta, "<strong>", "</strong>") }),
-      el("button", { type: "button", className: "tool-btn", text: "I", title: "Italic", onClick: () => wrapHtmlTag(ta, "<em>", "</em>") }),
-      el("button", { type: "button", className: "tool-btn", text: "P", title: "Paragraph", onClick: () => wrapHtmlTag(ta, "<p>", "</p>") }),
-      el("button", { type: "button", className: "tool-btn", text: "H2", title: "Heading", onClick: () => wrapHtmlTag(ta, "<h2>", "</h2>") }),
-      el("button", { type: "button", className: "tool-btn", text: "Link", title: "Link", onClick: () => wrapHtmlTag(ta, '<a href="">', "</a>") }),
-      el("button", { type: "button", className: "tool-btn", text: "List", title: "List", onClick: () => wrapHtmlTag(ta, "<ul>\n  <li>", "</li>\n</ul>") }),
-      el("button", {
-        type: "button",
-        className: "tool-btn tool-btn-accent",
-        text: "Preview",
-        onClick: () => {
-          const show = preview.hidden;
-          preview.hidden = !show;
-          if (show) {
-            frame.srcdoc =
-              "<!doctype html><html><head><style>body{font-family:system-ui,sans-serif;line-height:1.55;padding:16px;color:#151a22;max-width:720px;margin:0 auto}img{max-width:100%}</style></head><body>" +
-              ta.value +
-              "</body></html>";
-          }
-        },
-      }),
-    ]);
-
-    return el("div", { className: "html-editor-wrap" }, [toolbar, ta, preview]);
+    return wrap;
   }
 
   function fieldControl(key, value, path, api) {
@@ -482,6 +503,7 @@
         bodyEl = el("div", { className: "c-card-body" });
         bodyEl.appendChild(buildNode(item, cardPath, api, String(index), { depth: depth + 1 }));
         card.appendChild(bodyEl);
+        mountRichEditors(bodyEl);
         return bodyEl;
       }
 
@@ -636,9 +658,11 @@
       },
     };
 
+    destroyRichEditors();
     container.innerHTML = "";
     container.appendChild(buildNode(current, [], api, "root", { depth: 0 }));
+    mountRichEditors(container);
   }
 
-  global.FormEngine = { render, clone, typeOf, labelFromKey, fieldKind };
+  global.FormEngine = { render, clone, typeOf, labelFromKey, fieldKind, destroyRichEditors };
 })(window);
