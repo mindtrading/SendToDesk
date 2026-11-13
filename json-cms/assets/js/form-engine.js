@@ -279,7 +279,7 @@
 
     const fileInput = el("input", {
       type: "file",
-      accept: "image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif.webp",
+      accept: "image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp",
       className: "url-upload-file",
       hidden: true,
     });
