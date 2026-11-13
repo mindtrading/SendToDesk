@@ -11,10 +11,14 @@
   const $ = (sel) => document.querySelector(sel);
 
   async function api(path, options = {}) {
+    const { headers: extraHeaders, ...rest } = options;
     const res = await fetch(path, {
       credentials: "same-origin",
-      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-      ...options,
+      ...rest,
+      headers: {
+        "Content-Type": "application/json",
+        ...(extraHeaders || {}),
+      },
     });
     let body = null;
     const text = await res.text();
@@ -24,9 +28,10 @@
       body = { error: text || "Invalid response" };
     }
     if (!res.ok) {
-      const err = new Error((body && body.error) || res.statusText);
+      const err = new Error((body && body.error) || res.statusText || "Request failed");
       err.status = res.status;
       err.body = body;
+      err.path = path;
       throw err;
     }
     return body;
@@ -250,8 +255,13 @@
       });
       state.user = res.user;
       showApp();
-      await refreshFiles();
+      try {
+        await refreshFiles();
+      } catch (listErr) {
+        toast(listErr.message || "Could not load files", "error");
+      }
     } catch (err) {
+      showLogin();
       $("#login-error").textContent = err.message;
       $("#login-error").hidden = false;
     }
