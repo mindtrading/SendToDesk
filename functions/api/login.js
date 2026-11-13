@@ -3,7 +3,7 @@ import {
   sessionCookie,
   timingSafeEqual,
   json,
-} from "../_shared/auth.js";
+} from "../shared/auth.js";
 
 export async function onRequestPost({ request, env }) {
   let body;

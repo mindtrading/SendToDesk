@@ -1,5 +1,5 @@
-import { requireUser, json } from "../../_shared/auth.js";
-import { normalizeKey, displayName, readJson, writeJson } from "../../_shared/r2.js";
+import { requireUser, json } from "../../shared/auth.js";
+import { normalizeKey, displayName, readJson, writeJson } from "../../shared/r2.js";
 
 function pathFromParams(params) {
   const p = params.path;

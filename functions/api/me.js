@@ -1,4 +1,4 @@
-import { requireUser, json } from "../_shared/auth.js";
+import { requireUser, json } from "../shared/auth.js";
 
 export async function onRequestGet({ request, env }) {
   const user = await requireUser(request, env);

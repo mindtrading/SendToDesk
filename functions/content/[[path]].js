@@ -1,4 +1,4 @@
-import { normalizeKey, readJson } from "../_shared/r2.js";
+import { normalizeKey, readJson } from "../shared/r2.js";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
