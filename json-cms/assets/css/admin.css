@@ -776,22 +776,32 @@ a {
   border-color: var(--accent);
 }
 
-.sidebar-toggle .icon-menu,
-.sidebar-toggle .icon-close {
+/* Single hamburger — 3 bars via CSS only (no second close icon) */
+.sidebar-toggle .hb-bars {
+  position: relative;
+  width: 18px;
+  height: 12px;
   display: block;
-  flex: 0 0 auto;
 }
 
-.sidebar-toggle .icon-close {
-  display: none;
+.sidebar-toggle .hb-bars::before,
+.sidebar-toggle .hb-bars::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
 }
 
-.sidebar-toggle.is-active .icon-menu {
-  display: none;
+.sidebar-toggle .hb-bars::before {
+  top: 0;
+  box-shadow: 0 5px 0 currentColor;
 }
 
-.sidebar-toggle.is-active .icon-close {
-  display: block;
+.sidebar-toggle .hb-bars::after {
+  bottom: 0;
 }
 
 .app-shell {

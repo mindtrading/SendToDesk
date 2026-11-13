@@ -522,7 +522,6 @@
       } catch (_) {}
     }
     if (btn) {
-      btn.classList.toggle("is-active", !!open);
       btn.setAttribute("aria-expanded", open ? "true" : "false");
       btn.title = open ? "Hide sidebar" : "Show sidebar";
     }
