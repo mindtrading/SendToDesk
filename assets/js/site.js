@@ -34,9 +34,40 @@
     return path;
   }
 
+  function cleanBlogSlug(slug) {
+    return String(slug || "")
+      .trim()
+      .replace(/^\/+|\/+$/g, "")
+      .replace(/[^a-zA-Z0-9._~-]+/g, "-")
+      .replace(/-+/g, "-");
+  }
+
   function blogHref(slug) {
-    var base = location.pathname.indexOf("/blog") !== -1 ? "./" : "blog/";
-    return base + "?slug=" + encodeURIComponent(slug);
+    var clean = cleanBlogSlug(slug);
+    return clean ? "/blog/" + encodeURIComponent(clean) : "/blog/";
+  }
+
+  function getBlogSlugFromLocation() {
+    var params = new URLSearchParams(location.search);
+    var querySlug = cleanBlogSlug(params.get("slug") || "");
+    var parts = location.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+    var blogIdx = parts.indexOf("blog");
+    var pathSlug = "";
+    if (blogIdx !== -1 && parts[blogIdx + 1] && parts[blogIdx + 1] !== "index.html") {
+      try {
+        pathSlug = cleanBlogSlug(decodeURIComponent(parts[blogIdx + 1]));
+      } catch (_) {
+        pathSlug = cleanBlogSlug(parts[blogIdx + 1]);
+      }
+    }
+    // Prefer path slug; migrate old ?slug= URLs to /blog/slug
+    if (querySlug && !pathSlug) {
+      try {
+        history.replaceState(null, "", blogHref(querySlug));
+      } catch (_) {}
+      return querySlug;
+    }
+    return pathSlug;
   }
 
   function applyDownloads() {
@@ -253,11 +284,13 @@
   function renderBlogPage(posts) {
     var mount = document.getElementById("blog-mount");
     if (!mount) return;
-    var slug = new URLSearchParams(location.search).get("slug") || "";
+    var slug = getBlogSlugFromLocation();
 
     if (!slug) {
       document.title = "Blog — " + cfg.siteName;
       document.body.classList.remove("is-article");
+      var listCanon = document.querySelector('link[rel="canonical"]');
+      if (listCanon) listCanon.setAttribute("href", "/blog/");
       if (!posts.length) {
         mount.innerHTML = '<div class="blog-index"><p class="blog-empty">No posts published yet.</p></div>';
         return;
@@ -311,18 +344,20 @@
     if (!post) {
       document.body.classList.remove("is-article");
       mount.innerHTML =
-        '<div class="blog-index"><p class="blog-empty">Post not found. <a href="./">Back to all posts</a></p></div>';
+        '<div class="blog-index"><p class="blog-empty">Post not found. <a href="/blog/">Back to all posts</a></p></div>';
       return;
     }
 
     document.title = (post.title || "Post") + " — " + cfg.siteName;
     document.body.classList.add("is-article");
+    var canon = document.querySelector('link[rel="canonical"]');
+    if (canon) canon.setAttribute("href", blogHref(slug));
     var mins = readingTime(post.body || post.excerpt || "");
     var ctaLabel = (cfg.hero && cfg.hero.ctaLabel) || "Download now";
     mount.innerHTML =
       '<div class="blog-layout">' +
       '<article class="blog-article">' +
-      '<nav class="blog-crumb" aria-label="Breadcrumb"><a href="./">Blog</a><span aria-hidden="true">/</span><span>Article</span></nav>' +
+      '<nav class="blog-crumb" aria-label="Breadcrumb"><a href="/blog/">Blog</a><span aria-hidden="true">/</span><span>Article</span></nav>' +
       "<h1>" +
       escapeHtml(post.title || "Untitled") +
       "</h1>" +
@@ -352,15 +387,13 @@
       '<div class="blog-cta-card">' +
       '<div class="blog-cta-media">' +
       '<img src="' +
-      escapeHtml(rootHref("assets/img/blog-cta-banner.jpg")) +
+      "/assets/img/blog-cta-banner.jpg" +
       '" alt="Send files between phone and PC with SendToDesk" width="600" height="450" loading="lazy" />' +
       "</div>" +
       '<div class="blog-cta-copy">' +
       "<h2>Phone to PC. PC to phone.</h2>" +
       "<p>Scan a document or pick a file — send over Wi‑Fi in one tap. No cloud upload.</p>" +
-      '<a class="blog-cta-btn" href="' +
-      escapeHtml(rootHref("#download")) +
-      '">' +
+      '<a class="blog-cta-btn" href="/#download">' +
       escapeHtml(ctaLabel || "Download now") +
       "</a>" +
       "</div>" +
