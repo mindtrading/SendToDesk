@@ -11,10 +11,10 @@ html[data-theme="light"] {
   --line-strong: #c5cad3;
   --text: #151a22;
   --muted: #5b6573;
-  --accent: #1d4ed8;
-  --accent-hover: #1e40af;
-  --accent-soft: rgba(29, 78, 216, 0.1);
-  --accent-ring: rgba(29, 78, 216, 0.18);
+  --accent: #ff4500;
+  --accent-hover: #e03d00;
+  --accent-soft: rgba(255, 69, 0, 0.12);
+  --accent-ring: rgba(255, 69, 0, 0.2);
   --danger: #c0352b;
   --danger-soft: rgba(192, 53, 43, 0.12);
   --ok: #0f7a4f;
@@ -35,7 +35,7 @@ html[data-theme="light"] {
   --mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
-/* Dark theme aligned with Cursor Dark (neutral charcoal + soft blue accent) */
+/* Dark theme — Cursor charcoal surfaces + CorePanel orange accent */
 html[data-theme="dark"] {
   color-scheme: dark;
   --bg: #141414;
@@ -46,16 +46,16 @@ html[data-theme="dark"] {
   --line-strong: #3c3c3c;
   --text: #e4e4e4;
   --muted: #9b9b9b;
-  --accent: #82aaff;
-  --accent-hover: #a0c0ff;
-  --accent-soft: rgba(130, 170, 255, 0.14);
-  --accent-ring: rgba(130, 170, 255, 0.22);
+  --accent: #ff6a33;
+  --accent-hover: #ff854f;
+  --accent-soft: rgba(255, 106, 51, 0.16);
+  --accent-ring: rgba(255, 106, 51, 0.24);
   --danger: #f07178;
   --danger-soft: rgba(240, 113, 120, 0.16);
   --ok: #7fd992;
   --ok-soft: rgba(127, 217, 146, 0.14);
   --warn: #e2b55a;
-  --btn-fg: #0f0f0f;
+  --btn-fg: #141414;
   --toggle-track: #3c3c3c;
   --toggle-knob: #e4e4e4;
   --sidebar-bg: rgba(20, 20, 20, 0.96);
