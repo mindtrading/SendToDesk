@@ -138,6 +138,13 @@
     document.querySelectorAll("[data-theme-set]").forEach((btn) => {
       btn.classList.toggle("active", btn.getAttribute("data-theme-set") === next);
     });
+    const logo = $("#side-logo");
+    if (logo) {
+      const light = logo.getAttribute("data-logo-light");
+      const dark = logo.getAttribute("data-logo-dark");
+      const src = next === "dark" ? dark : light;
+      if (src && logo.getAttribute("src") !== src) logo.setAttribute("src", src);
+    }
   }
 
   function initTheme() {
