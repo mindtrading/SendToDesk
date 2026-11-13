@@ -11,6 +11,7 @@
     draftTimer: null,
     lastDraftAt: null,
     autosaveBusy: false,
+    studioSection: "content",
   };
 
   const THEME_KEY = "cs-theme";
@@ -201,6 +202,254 @@
     $("#user-label").textContent = state.user || "admin";
     const floatToggle = document.querySelector(".theme-toggle-float");
     if (floatToggle) floatToggle.hidden = true;
+    setStudioSection(state.studioSection || "content");
+  }
+
+  function setStudioSection(section) {
+    state.studioSection = section === "media" ? "media" : "content";
+    const isMedia = state.studioSection === "media";
+    document.querySelectorAll(".side-nav-btn").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.getAttribute("data-studio") === state.studioSection);
+    });
+    const contentSide = $("#content-side");
+    const mediaSide = $("#media-side");
+    const contentEditor = $("#content-editor");
+    const mediaLib = $("#media-library");
+    const saveBar = $("#save-bar");
+    const delBtn = $("#btn-delete");
+    if (contentSide) contentSide.hidden = isMedia;
+    if (mediaSide) mediaSide.hidden = !isMedia;
+    if (contentEditor) contentEditor.hidden = isMedia;
+    if (mediaLib) mediaLib.hidden = !isMedia;
+    if (delBtn) delBtn.hidden = isMedia;
+    if (isMedia) {
+      $("#current-file").textContent = "Media library";
+      if (saveBar) saveBar.hidden = true;
+      refreshMediaLibrary().catch((e) => toast(e.message, "error"));
+    } else {
+      if (!state.currentName) {
+        $("#current-file").textContent = "Content Studio";
+        if (saveBar) saveBar.hidden = true;
+      } else {
+        $("#current-file").textContent = prettyName(state.currentName);
+        if (saveBar) saveBar.hidden = false;
+      }
+    }
+  }
+
+  function formatBytes(n) {
+    if (n == null) return "";
+    if (n < 1024) return n + " B";
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+    return (n / (1024 * 1024)).toFixed(2) + " MB";
+  }
+
+  function absoluteMediaUrl(path) {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    return location.origin + (path.startsWith("/") ? path : "/" + path);
+  }
+
+  async function fileToWebP(file, quality) {
+    if (!window.createImageBitmap || !HTMLCanvasElement.prototype.toBlob) {
+      throw new Error("WebP convert not supported in this browser");
+    }
+    if (file.type === "image/webp") return file;
+    if (file.type === "image/gif") return file; // keep animated GIFs
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(bitmap, 0, 0);
+    if (bitmap.close) bitmap.close();
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("WebP encode failed"))),
+        "image/webp",
+        quality == null ? 0.82 : quality
+      );
+    });
+    const base = String(file.name || "image").replace(/\.[^.]+$/, "");
+    return new File([blob], base + ".webp", { type: "image/webp" });
+  }
+
+  async function uploadMediaFile(file) {
+    const wantWebp = $("#media-webp") && $("#media-webp").checked;
+    let uploadFile = file;
+    if (wantWebp && file.type !== "image/webp" && file.type !== "image/gif") {
+      uploadFile = await fileToWebP(file, 0.82);
+    }
+    const fd = new FormData();
+    fd.append("file", uploadFile, uploadFile.name);
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: fd,
+      credentials: "same-origin",
+    });
+    let body = null;
+    try {
+      body = await res.json();
+    } catch (_) {}
+    if (!res.ok) {
+      throw new Error((body && (body.errorMessage || body.error)) || "Upload failed");
+    }
+    const first = body && body.result && body.result[0];
+    if (!first) throw new Error("Upload returned nothing");
+    return first;
+  }
+
+  function setR2Status(ok, text) {
+    const dot = $("#r2-dot");
+    const label = $("#r2-status-text");
+    const box = $("#r2-status");
+    if (dot) {
+      dot.classList.toggle("is-ok", !!ok);
+      dot.classList.toggle("is-bad", ok === false);
+    }
+    if (box) {
+      box.classList.toggle("is-ok", !!ok);
+      box.classList.toggle("is-bad", ok === false);
+    }
+    if (label) label.textContent = text;
+  }
+
+  async function refreshMediaLibrary() {
+    setR2Status(null, "Checking R2…");
+    const grid = $("#media-grid");
+    const empty = $("#media-empty");
+    try {
+      const res = await api("/api/media");
+      const ok = !!res.bindingOk;
+      setR2Status(
+        ok,
+        ok
+          ? "R2 connected · " + (res.count || 0) + " file" + ((res.count || 0) === 1 ? "" : "s")
+          : "R2 not connected"
+      );
+      const items = res.items || [];
+      if (!grid) return;
+      grid.innerHTML = "";
+      if (empty) empty.hidden = items.length > 0;
+      items.forEach((item) => {
+        const fullUrl = absoluteMediaUrl(item.url);
+        const card = document.createElement("article");
+        card.className = "media-card";
+        card.innerHTML =
+          '<div class="media-thumb-wrap"><img class="media-thumb" src="' +
+          escapeHtml(fullUrl) +
+          '" alt="" loading="lazy" /></div>' +
+          '<div class="media-card-meta">' +
+          "<strong>" +
+          escapeHtml(item.name || "image") +
+          "</strong>" +
+          '<span class="muted">' +
+          escapeHtml(formatBytes(item.size)) +
+          (item.uploaded ? " · " + escapeHtml(item.uploaded.slice(0, 10)) : "") +
+          "</span>" +
+          '<input class="input media-url-input" readonly value="' +
+          escapeHtml(fullUrl) +
+          '" />' +
+          '<div class="media-card-actions">' +
+          '<button type="button" class="btn btn-secondary btn-sm" data-act="copy">Copy link</button>' +
+          '<button type="button" class="btn btn-ghost btn-sm" data-act="open">Open</button>' +
+          '<button type="button" class="btn btn-ghost btn-sm" data-act="delete">Delete</button>' +
+          "</div></div>";
+        card.querySelector('[data-act="copy"]').addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(fullUrl);
+            toast("Link copied", "ok");
+          } catch (_) {
+            const inp = card.querySelector(".media-url-input");
+            if (inp) {
+              inp.select();
+              document.execCommand("copy");
+              toast("Link copied", "ok");
+            }
+          }
+        });
+        card.querySelector('[data-act="open"]').addEventListener("click", () => {
+          window.open(fullUrl, "_blank", "noopener");
+        });
+        card.querySelector('[data-act="delete"]').addEventListener("click", async () => {
+          if (!confirm("Delete this image from R2?")) return;
+          try {
+            await api("/api/media/" + item.key.replace(/^media\//, ""), { method: "DELETE" });
+            toast("Deleted", "ok");
+            await refreshMediaLibrary();
+          } catch (e) {
+            toast(e.message, "error");
+          }
+        });
+        grid.appendChild(card);
+      });
+    } catch (e) {
+      setR2Status(false, e.message || "R2 check failed");
+      throw e;
+    }
+  }
+
+  async function handleMediaUploads(fileList) {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    const hint = $("#media-upload-hint");
+    let ok = 0;
+    for (const file of files) {
+      if (hint) hint.textContent = "Uploading " + file.name + "…";
+      try {
+        await uploadMediaFile(file);
+        ok += 1;
+      } catch (e) {
+        toast(e.message || "Upload failed", "error");
+      }
+    }
+    if (hint) {
+      hint.textContent = "WebP conversion keeps files smaller before upload.";
+    }
+    if (ok) {
+      toast("Uploaded " + ok + " image" + (ok === 1 ? "" : "s"), "ok");
+      await refreshMediaLibrary();
+    }
+  }
+
+  function bindMediaUi() {
+    const navContent = $("#nav-content");
+    const navMedia = $("#nav-media");
+    if (navContent) {
+      navContent.addEventListener("click", () => setStudioSection("content"));
+    }
+    if (navMedia) {
+      navMedia.addEventListener("click", () => setStudioSection("media"));
+    }
+    const refresh = $("#media-refresh");
+    if (refresh) refresh.addEventListener("click", () => refreshMediaLibrary().catch((e) => toast(e.message, "error")));
+    const fileInput = $("#media-file");
+    if (fileInput) {
+      fileInput.addEventListener("change", () => {
+        handleMediaUploads(fileInput.files).finally(() => {
+          fileInput.value = "";
+        });
+      });
+    }
+    const drop = $("#media-drop");
+    if (drop) {
+      ["dragenter", "dragover"].forEach((ev) => {
+        drop.addEventListener(ev, (e) => {
+          e.preventDefault();
+          drop.classList.add("is-drag");
+        });
+      });
+      ["dragleave", "drop"].forEach((ev) => {
+        drop.addEventListener(ev, (e) => {
+          e.preventDefault();
+          drop.classList.remove("is-drag");
+        });
+      });
+      drop.addEventListener("drop", (e) => {
+        const files = e.dataTransfer && e.dataTransfer.files;
+        handleMediaUploads(files);
+      });
+    }
   }
 
   function showSetup() {
@@ -961,5 +1210,6 @@
 
   initTheme();
   bindSetupUi();
+  bindMediaUi();
   checkAuth();
 })();

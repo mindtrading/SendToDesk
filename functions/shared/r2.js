@@ -95,6 +95,38 @@ export async function writeMedia(bucket, key, data, contentType) {
   return key;
 }
 
+export async function listMedia(bucket) {
+  const items = [];
+  let cursor;
+  do {
+    const listed = await bucket.list({ prefix: "media/", cursor, limit: 1000 });
+    for (const obj of listed.objects || []) {
+      if (!obj.key || obj.key.endsWith("/")) continue;
+      const name = obj.key.split("/").pop();
+      items.push({
+        key: obj.key,
+        name,
+        url: "/" + obj.key,
+        size: obj.size,
+        uploaded: obj.uploaded ? new Date(obj.uploaded).toISOString() : null,
+      });
+    }
+    cursor = listed.truncated && listed.cursor ? listed.cursor : undefined;
+  } while (cursor);
+  items.sort((a, b) => String(b.uploaded || "").localeCompare(String(a.uploaded || "")));
+  return items;
+}
+
+export async function deleteMedia(bucket, key) {
+  let k = String(key || "").replace(/^\/+/, "");
+  if (!k.startsWith("media/")) k = "media/" + k;
+  if (k.includes("..") || k.includes("\\") || k.includes("\0")) {
+    throw new Error("Invalid media key");
+  }
+  await bucket.delete(k);
+  return k;
+}
+
 const MAX_VERSIONS = 30;
 
 export function draftKey(fileName) {

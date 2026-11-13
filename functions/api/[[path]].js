@@ -15,6 +15,8 @@ import {
   isAllowedImage,
   mediaObjectKey,
   writeMedia,
+  listMedia,
+  deleteMedia,
   saveVersionSnapshot,
   listVersions,
   readVersion,
@@ -263,6 +265,10 @@ export async function onRequest(context) {
     return handleUpload(request, env);
   }
 
+  if (head === "media") {
+    return handleMediaLibrary(request, env, segs.slice(1), method);
+  }
+
   if (head === "files") {
     return handleFiles(request, env, segs.slice(1));
   }
@@ -280,6 +286,39 @@ export async function onRequest(context) {
   }
 
   return json({ error: "Not found", path: segs.join("/") }, 404);
+}
+
+async function handleMediaLibrary(request, env, parts, method) {
+  const user = await requireUser(request, env);
+  if (!user) return json({ error: "Unauthorized" }, 401);
+
+  const bindingOk = Boolean(env.CONTENT);
+  if (!bindingOk) {
+    return json({ bindingOk: false, items: [], error: "R2 binding CONTENT missing" }, 500);
+  }
+
+  // GET /api/media
+  if (!parts.length && method === "GET") {
+    try {
+      const items = await listMedia(env.CONTENT);
+      return json({ bindingOk: true, count: items.length, items });
+    } catch (e) {
+      return json({ error: e.message || "List media failed", bindingOk: true }, 500);
+    }
+  }
+
+  // DELETE /api/media/:key...
+  if (parts.length && method === "DELETE") {
+    try {
+      const key = parts.join("/");
+      const deleted = await deleteMedia(env.CONTENT, key);
+      return json({ ok: true, key: deleted });
+    } catch (e) {
+      return json({ error: e.message || "Delete failed" }, 500);
+    }
+  }
+
+  return json({ error: "Not found" }, 404);
 }
 
 async function handleSetup(request, env, parts, method) {

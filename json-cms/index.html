@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=11" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=12" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -164,14 +164,27 @@
   <div id="app-view" class="app-shell" hidden>
     <aside class="sidebar">
       <div class="side-head">
-        <h2>Content</h2>
+        <h2>Content Studio</h2>
       </div>
-      <div class="side-actions">
-        <button type="button" class="btn btn-secondary btn-sm" id="btn-new">New content</button>
-        <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh">Refresh</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="btn-seed">Load demos</button>
+      <nav class="side-nav" aria-label="Studio sections">
+        <button type="button" class="side-nav-btn is-active" id="nav-content" data-studio="content">Content</button>
+        <button type="button" class="side-nav-btn" id="nav-media" data-studio="media">Media</button>
+      </nav>
+      <div id="content-side" class="side-section">
+        <div class="side-actions">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-new">New content</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh">Refresh</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-seed">Load demos</button>
+        </div>
+        <div id="file-list" class="file-list"></div>
       </div>
-      <div id="file-list" class="file-list"></div>
+      <div id="media-side" class="side-section" hidden>
+        <p class="side-hint">Upload images to R2. Copy links into posts and settings.</p>
+        <div class="r2-status" id="r2-status">
+          <span class="r2-dot" id="r2-dot"></span>
+          <span id="r2-status-text">Checking R2…</span>
+        </div>
+      </div>
     </aside>
 
     <section class="main">
@@ -191,7 +204,33 @@
         </div>
       </header>
 
-      <div class="editor">
+      <div id="media-library" class="media-library" hidden>
+        <div class="media-toolbar">
+          <div>
+            <h2>Media library</h2>
+            <p class="media-sub">WordPress-style gallery · files live in R2 under <code>media/</code></p>
+          </div>
+          <div class="media-toolbar-actions">
+            <label class="media-webp-toggle">
+              <input type="checkbox" id="media-webp" checked />
+              Convert to WebP
+            </label>
+            <label class="btn btn-secondary btn-sm media-upload-btn">
+              Upload images
+              <input type="file" id="media-file" accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp" multiple hidden />
+            </label>
+            <button type="button" class="btn btn-ghost btn-sm" id="media-refresh">Refresh</button>
+          </div>
+        </div>
+        <div id="media-drop" class="media-drop">
+          <p>Drop images here or use <strong>Upload images</strong></p>
+          <p class="muted" id="media-upload-hint">WebP conversion keeps files smaller before upload.</p>
+        </div>
+        <div id="media-grid" class="media-grid"></div>
+        <p id="media-empty" class="media-empty" hidden>No images yet. Upload your first file.</p>
+      </div>
+
+      <div class="editor" id="content-editor">
         <div id="editor-empty" class="empty-state">
           <h2>Pick content to edit</h2>
           <p>Choose an item on the left, or click <strong>Load demos</strong> to try site settings, blog HTML, ads, FAQ, team, and more.</p>
@@ -266,6 +305,6 @@
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
   <script src="assets/js/form-engine.js?v=13"></script>
-  <script src="assets/js/admin-app.js?v=12"></script>
+  <script src="assets/js/admin-app.js?v=13"></script>
 </body>
 </html>
