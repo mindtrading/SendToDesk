@@ -4,7 +4,8 @@
 (function (global) {
   const HTML_KEYS = /^(html|body|content|article|postBody|descriptionHtml|richText|markup)$/i;
   const LONG_KEYS = /^(description|excerpt|summary|bio|about|message|notes|caption|subtitle|lede|intro)$/i;
-  const URL_KEYS = /^(url|href|link|src|image|imageUrl|logo|thumbnail|avatar|downloadUrl|playStoreUrl|windowsUrl|canonical|website)$/i;
+  const URL_KEYS = /^(url|href|link|src|image|imageUrl|logo|thumbnail|avatar|photo|photoUrl|cover|banner|icon|ogImage|downloadUrl|playStoreUrl|windowsUrl|canonical|website)$/i;
+  const IMAGE_URL_KEYS = /(image|logo|thumb|avatar|photo|cover|banner|icon|ogImage|^src$)/i;
   const EMAIL_KEYS = /^(email|supportEmail|contactEmail|mail)$/i;
   const DATE_KEYS = /^(date|publishedAt|updatedAt|createdAt|startDate|endDate)$/i;
   const COLOR_KEYS = /^(color|bg|background|themeColor|accent)$/i;
@@ -221,8 +222,106 @@
     return wrap;
   }
 
+  function isImageUrlField(key, forcedKind) {
+    if (forcedKind === "url" && IMAGE_URL_KEYS.test(String(key))) return true;
+    return IMAGE_URL_KEYS.test(String(key));
+  }
+
+  async function uploadImageFile(file) {
+    const fd = new FormData();
+    fd.append("file", file, file.name || "image.jpg");
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: fd,
+      credentials: "same-origin",
+    });
+    let body = null;
+    try {
+      body = await res.json();
+    } catch (_) {}
+    if (!res.ok) {
+      throw new Error((body && (body.errorMessage || body.error)) || "Upload failed");
+    }
+    const first = body && body.result && body.result[0];
+    if (!first || !first.url) throw new Error("Upload returned no URL");
+    return first.url;
+  }
+
+  function imageUrlControl(key, value, path, api) {
+    const input = el("input", {
+      className: "input",
+      type: "url",
+      placeholder: "https:// or upload below",
+      onInput: (e) => {
+        api.change(path, e.target.value);
+        syncPreview(e.target.value);
+      },
+    });
+    input.value = value || "";
+
+    const preview = el("img", {
+      className: "url-upload-preview",
+      alt: "",
+    });
+    const previewWrap = el("div", { className: "url-upload-preview-wrap", hidden: true }, [preview]);
+
+    function syncPreview(url) {
+      const u = String(url || "").trim();
+      if (u && /^https?:\/\//i.test(u)) {
+        preview.src = u;
+        previewWrap.hidden = false;
+      } else {
+        preview.removeAttribute("src");
+        previewWrap.hidden = true;
+      }
+    }
+    syncPreview(value);
+
+    const fileInput = el("input", {
+      type: "file",
+      accept: "image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif.webp",
+      className: "url-upload-file",
+      hidden: true,
+    });
+
+    const status = el("span", { className: "url-upload-status muted", text: "" });
+    const btn = el("button", {
+      type: "button",
+      className: "btn btn-secondary btn-sm",
+      text: "Upload image",
+      onClick: () => fileInput.click(),
+    });
+
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files && fileInput.files[0];
+      fileInput.value = "";
+      if (!file) return;
+      btn.disabled = true;
+      status.textContent = "Uploading…";
+      try {
+        const url = await uploadImageFile(file);
+        input.value = url;
+        api.change(path, url);
+        syncPreview(url);
+        status.textContent = "Uploaded to R2 · media/";
+      } catch (e) {
+        status.textContent = e.message || "Upload failed";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    const actions = el("div", { className: "url-upload-actions" }, [btn, status, fileInput]);
+    const wrap = el("div", { className: "url-upload" }, [input, actions, previewWrap]);
+    return wrap;
+  }
+
   function fieldControl(key, value, path, api, forcedKind) {
     const kind = forcedKind || fieldKind(key, value);
+
+    if (kind === "url" && isImageUrlField(key, forcedKind)) {
+      return { kind, control: imageUrlControl(key, value, path, api), wide: true };
+    }
 
     if (kind === "text" || kind === "email" || kind === "url" || kind === "date") {
       const input = el("input", {

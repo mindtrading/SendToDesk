@@ -1817,3 +1817,36 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
     padding: 22px 18px 24px;
   }
 }
+
+/* ===== Image URL upload ===== */
+.url-upload {
+  display: grid;
+  gap: 10px;
+}
+
+.url-upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.url-upload-status {
+  font-size: 0.82rem;
+}
+
+.url-upload-preview-wrap {
+  width: min(280px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+
+.url-upload-preview {
+  display: block;
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  background: var(--bg-soft);
+}
