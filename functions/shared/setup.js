@@ -55,12 +55,12 @@ export async function resetInstallation(bucket) {
 
 export function buildSiteSettings(input = {}) {
   const siteName = String(input.siteName || "My Site").trim() || "My Site";
-  const tagline = String(input.tagline || "Edit this in Content Studio").trim();
+  const tagline = String(input.tagline || "Edit this in CorePanel").trim();
   const supportEmail = String(input.supportEmail || "support@example.com").trim();
   const themeColor = String(input.themeColor || "#1d4ed8").trim() || "#1d4ed8";
   const heroTitle = String(input.heroTitle || `Welcome to ${siteName}`).trim();
   const heroSubtitle = String(
-    input.heroSubtitle || tagline || "Your content is live from Content Studio."
+    input.heroSubtitle || tagline || "Your content is live from CorePanel."
   ).trim();
   const ctaLabel = String(input.ctaLabel || "Get started").trim();
   const heroImage = String(input.heroImage || "").trim();
@@ -136,9 +136,9 @@ export function buildPackData(packId, site) {
           slug: "welcome",
           date: new Date().toISOString().slice(0, 10),
           published: true,
-          excerpt: `Get started with ${name}. Edit this post in Content Studio.`,
+          excerpt: `Get started with ${name}. Edit this post in CorePanel.`,
           imageUrl: "",
-          body: `<h2>You're live</h2><p>This post was created by the setup wizard. Open <strong>blog.json</strong> in Content Studio to edit it.</p><p>Need help? Email <em>${email}</em>.</p>`,
+          body: `<h2>You're live</h2><p>This post was created by the setup wizard. Open <strong>blog.json</strong> in CorePanel to edit it.</p><p>Need help? Email <em>${email}</em>.</p>`,
         },
       ],
     };
@@ -150,7 +150,7 @@ export function buildPackData(packId, site) {
       items: [
         {
           title: "How do I edit content?",
-          body: "<p>Sign in to Content Studio, open a file on the left, edit fields, then Save.</p>",
+          body: "<p>Sign in to CorePanel, open a file on the left, edit fields, then Save.</p>",
         },
         {
           title: "Where is the live JSON?",
@@ -167,7 +167,7 @@ export function buildPackData(packId, site) {
           title: "About",
           slug: "about",
           published: true,
-          body: `<p>${name} — ${site.tagline || "powered by Content Studio"}.</p>`,
+          body: `<p>${name} — ${site.tagline || "powered by CorePanel"}.</p>`,
         },
       ],
     };
@@ -196,7 +196,7 @@ export function buildPackData(packId, site) {
         {
           name: "Founder",
           role: "Owner",
-          bio: "Update this in Content Studio.",
+          bio: "Update this in CorePanel.",
           photoUrl: "",
           email,
         },

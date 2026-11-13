@@ -1,6 +1,6 @@
-# ক্লায়েন্ট ওয়েবসাইট + Content Studio — সম্পূর্ণ গাইড
+# ক্লায়েন্ট ওয়েবসাইট + CorePanel — সম্পূর্ণ গাইড
 
-এই গাইডটা **মার্কেটার / ফ্রিল্যান্সার** হিসেবে ক্লায়েন্টকে সাইট দিবেন, আর কনটেন্ট এডিট করার জন্য এই JSON CMS (Content Studio) সেটআপ ও কানেক্ট করবেন — সেই পুরো ছবি।
+এই গাইডটা **মার্কেটার / ফ্রিল্যান্সার** হিসেবে ক্লায়েন্টকে সাইট দিবেন, আর কনটেন্ট এডিট করার জন্য এই JSON CMS (CorePanel) সেটআপ ও কানেক্ট করবেন — সেই পুরো ছবি।
 
 ---
 
@@ -8,7 +8,7 @@
 
 ```
 ┌─────────────────────┐         ┌──────────────────────────┐
-│  ক্লায়েন্টের সাইট    │  fetch  │  Content Studio backend  │
+│  ক্লায়েন্টের সাইট    │  fetch  │  CorePanel backend  │
 │  (HTML/CSS/JS)      │ ──────► │  /content/*.json         │
 │  sendtodesk.pages…  │         │  (Cloudflare Pages Fn)   │
 └─────────────────────┘         └────────────┬─────────────┘
@@ -33,7 +33,7 @@
 | ভাগ | কাজ | কে ব্যবহার করে |
 |-----|-----|----------------|
 | **পাবলিক সাইট** | ভিজিটর দেখে | সবাই |
-| **Content Studio** (`/json-cms/`) | কনটেন্ট এডিট/সেভ | আপনি বা ক্লায়েন্ট |
+| **CorePanel** (`/json-cms/`) | কনটেন্ট এডিট/সেভ | আপনি বা ক্লায়েন্ট |
 | **R2** | সব JSON ফাইল জমা | সার্ভার (লুকানো) |
 
 ক্লায়েন্ট **কোড ছোঁয় না** — শুধু Studio তে লগইন করে টেক্সট/ইমেজ বদলায় → Save → সাইটে লাইভ।
@@ -96,7 +96,7 @@ Studio তে **New content** বা **Setup wizard** দিয়ে এগুল�
 
 ---
 
-## ৩) Backend (Content Studio) সেটআপ — প্রতি ক্লায়েন্ট
+## ৩) Backend (CorePanel) সেটআপ — প্রতি ক্লায়েন্ট
 
 **গুরুত্বপূর্ণ সিদ্ধান্ত:**  
 এক ক্লায়েন্ট = **আলাদা** Cloudflare Pages প্রজেক্ট + **আলাদা** R2 বাকেট।  
@@ -135,7 +135,7 @@ Studio তে **New content** বা **Setup wizard** দিয়ে এগুল�
 2. **First-time setup** wizard আসবে (R2 খালি হলে)  
 3. Site name, email, download links, starter packs বেছে **Install now**  
 4. R2 তে লাইভ JSON তৈরি হবে  
-5. **Open Content Studio** → এডিট শুরু
+5. **Open CorePanel** → এডিট শুরু
 
 পরে আবার wizard চাইলে (টেস্ট): অ্যাডমিন লগইন করে API `POST /api/setup/reset` (বা ডেভকে বলুন রিসেট করতে)।
 
@@ -233,7 +233,7 @@ repo/
 | জিনিস | URL |
 |--------|-----|
 | পাবলিক সাইট | https://sendtodesk.pages.dev/ |
-| Content Studio | https://sendtodesk.pages.dev/json-cms/ |
+| CorePanel | https://sendtodesk.pages.dev/json-cms/ |
 | Settings JSON | https://sendtodesk.pages.dev/content/site-settings.json |
 | Blog JSON | https://sendtodesk.pages.dev/content/blog.json |
 
@@ -256,6 +256,6 @@ repo/
 ## ১০) এক লাইনে সারাংশ
 
 **ক্লায়েন্ট সাইট = সুন্দর ফ্রন্ট।**  
-**Content Studio = এডিটর।**  
+**CorePanel = এডিটর।**  
 **R2 = ডেটাবেস (JSON ফাইল)।**  
 সাইট শুধু `/content/ফাইল.json` ফেচ করে — এটাই কানেক্ট।

@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=30" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=31" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -34,23 +34,29 @@
   </div>
 
   <div id="login-view" class="login-view">
-    <form id="login-form" class="login-card" autocomplete="on">
-      <div class="brand-mark"><span class="dot"></span><strong>Content Studio</strong></div>
-      <h1>Sign in</h1>
-      <p class="sub">Edit website content — pages, blog, ads, and settings.</p>
-      <div class="stack">
-        <input id="username" class="input" name="username" placeholder="Username" required autocomplete="username" />
-        <input id="password" class="input" name="password" type="password" placeholder="Password" required autocomplete="current-password" />
-        <button class="btn btn-block" type="submit">Sign in</button>
-      </div>
-      <p id="login-error" class="error" hidden></p>
-    </form>
+    <div class="login-stack">
+      <form id="login-form" class="login-card" autocomplete="on">
+        <div class="brand-mark"><span class="dot"></span><strong>CorePanel</strong></div>
+        <h1>Sign in</h1>
+        <p class="sub">Edit website content — pages, blog, ads, and settings.</p>
+        <div class="stack">
+          <input id="username" class="input" name="username" placeholder="Username" required autocomplete="username" />
+          <input id="password" class="input" name="password" type="password" placeholder="Password" required autocomplete="current-password" />
+          <button class="btn btn-block" type="submit">Sign in</button>
+        </div>
+        <p id="login-error" class="error" hidden></p>
+      </form>
+      <footer class="bm-footer">
+        <p class="bm-footer-kicker">Built by <strong>BeraMate</strong></p>
+        <p class="bm-footer-copy">Quiet software for teams who publish with clarity and care.</p>
+      </footer>
+    </div>
   </div>
 
   <div id="setup-view" class="setup-view" hidden>
     <div class="setup-shell">
       <aside class="setup-rail">
-        <div class="brand-mark"><span class="dot"></span><strong>Content Studio</strong></div>
+        <div class="brand-mark"><span class="dot"></span><strong>CorePanel</strong></div>
         <h2 class="setup-rail-title">First-time setup</h2>
         <p class="setup-rail-sub">A short wizard prepares your live JSON content in R2.</p>
         <ol class="setup-steps" id="setup-steps" aria-label="Setup steps">
@@ -67,7 +73,7 @@
 
         <div class="setup-panel" data-panel="1">
           <p class="setup-kicker">Step 1 of 5</p>
-          <h1>Welcome — let’s install Content Studio</h1>
+          <h1>Welcome — let’s install CorePanel</h1>
           <p class="setup-lead">After login, this wizard creates your first live JSON files. Your public site can fetch them from <code>/content/</code>.</p>
           <ul class="setup-checklist" id="setup-checks">
             <li data-check="auth">Signed in</li>
@@ -156,7 +162,7 @@
             <button type="button" class="btn" id="setup-install">Install now</button>
           </div>
           <div class="setup-actions" id="setup-enter-actions" hidden>
-            <button type="button" class="btn" id="setup-enter">Open Content Studio</button>
+            <button type="button" class="btn" id="setup-enter">Open CorePanel</button>
           </div>
           <p id="setup-error" class="error" hidden></p>
         </div>
@@ -210,6 +216,11 @@
           </span>
           <span class="side-logout-text">Logout</span>
         </button>
+        <footer class="side-credit">
+          <span class="side-credit-label">Built by</span>
+          <strong class="side-credit-brand">BeraMate</strong>
+          <span class="side-credit-copy">Clarity in every publish.</span>
+        </footer>
       </div>
     </aside>
 
@@ -219,7 +230,7 @@
           <button type="button" class="sidebar-toggle" id="btn-sidebar" aria-label="Toggle sidebar" aria-expanded="true" title="Toggle sidebar">
             <span class="hb-bars" aria-hidden="true"></span>
           </button>
-          <h1 id="current-file">Content Studio</h1>
+          <h1 id="current-file">CorePanel</h1>
           <span id="dirty-dot" class="dirty-dot" hidden title="Unsaved changes"></span>
         </div>
         <div class="topbar-actions">
@@ -346,6 +357,6 @@
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
   <script src="assets/js/form-engine.js?v=14"></script>
-  <script src="assets/js/admin-app.js?v=22"></script>
+  <script src="assets/js/admin-app.js?v=23"></script>
 </body>
 </html>

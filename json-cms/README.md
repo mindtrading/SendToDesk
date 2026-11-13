@@ -1,4 +1,4 @@
-# Content Studio (JSON CMS)
+# CorePanel (JSON CMS)
 
 Live: **https://sendtodesk.pages.dev/json-cms/**
 

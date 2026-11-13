@@ -309,7 +309,7 @@
       refreshMediaLibrary().catch((e) => toast(e.message, "error"));
     } else {
       if (!state.currentName) {
-        $("#current-file").textContent = "Content Studio";
+        $("#current-file").textContent = "CorePanel";
         if (saveBar) saveBar.hidden = true;
       } else {
         $("#current-file").textContent = prettyName(state.currentName);

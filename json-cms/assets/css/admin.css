@@ -143,13 +143,50 @@ a {
   padding: 24px;
 }
 
-.login-card {
+.login-stack {
   width: min(400px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.login-card {
+  width: 100%;
   background: var(--bg-elev);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 32px 28px;
   box-shadow: var(--shadow-lg);
+}
+
+.bm-footer {
+  text-align: center;
+  padding: 4px 8px 2px;
+}
+
+.bm-footer-kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.bm-footer-kicker strong {
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.bm-footer-copy {
+  margin: 8px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 28ch;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .brand-mark {
@@ -300,6 +337,40 @@ a {
   padding-top: 14px;
   border-top: 1px solid var(--line);
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.side-credit {
+  padding: 2px 4px 2px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.side-credit-label {
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.side-credit-brand {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.side-credit-copy {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.35;
+  margin-top: 2px;
 }
 
 .side-logout {
