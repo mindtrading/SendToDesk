@@ -591,10 +591,10 @@ a {
   font-size: 0.8rem;
 }
 
-.field-remove {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+/* Legacy field chrome disabled — editor uses .c-* components */
+.field-remove,
+.type-badge:not(.soft) {
+  display: none !important;
 }
 
 .object-panel,
