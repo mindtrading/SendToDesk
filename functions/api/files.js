@@ -26,9 +26,14 @@ export async function onRequestPost({ request, env }) {
     return json({ error: "Invalid JSON body" }, 400);
   }
 
+  const rawName = body.name || body.key;
+  if (!rawName || !String(rawName).trim()) {
+    return json({ error: "Missing file name" }, 400);
+  }
+
   let key;
   try {
-    key = normalizeKey(body.name || body.key);
+    key = normalizeKey(rawName);
   } catch (e) {
     return json({ error: e.message }, 400);
   }
