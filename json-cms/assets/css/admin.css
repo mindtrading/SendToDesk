@@ -794,16 +794,6 @@ a {
   display: block;
 }
 
-.sidebar-toggle-in {
-  width: 34px;
-  height: 34px;
-  box-shadow: none;
-}
-
-.sidebar-toggle-in .icon-close {
-  display: block;
-}
-
 .app-shell {
   transition: grid-template-columns 0.2s ease;
 }

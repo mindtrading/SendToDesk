@@ -535,12 +535,10 @@
 
   function bindSidebarUi() {
     const btn = $("#btn-sidebar");
-    const closeBtn = $("#btn-sidebar-close");
     const backdrop = $("#sidebar-backdrop");
     const sidebar = $("#studio-sidebar");
     const toggle = () => setSidebarOpen(!isSidebarVisible());
     if (btn) btn.addEventListener("click", toggle);
-    if (closeBtn) closeBtn.addEventListener("click", () => setSidebarOpen(false));
     if (backdrop) backdrop.addEventListener("click", () => setSidebarOpen(false));
 
     // Any menu / action inside sidebar closes the slide-over on small screens
