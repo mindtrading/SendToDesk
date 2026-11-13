@@ -185,32 +185,6 @@
     return Math.max(1, Math.ceil(words / 200));
   }
 
-  function shareButtons(title) {
-    var url = encodeURIComponent(location.href);
-    var text = encodeURIComponent(title || "SendToDesk");
-    return (
-      '<div class="blog-share" aria-label="Share">' +
-      '<a class="blog-share-btn" href="https://wa.me/?text=' +
-      text +
-      "%20" +
-      url +
-      '" target="_blank" rel="noopener" title="WhatsApp" aria-label="Share on WhatsApp">' +
-      '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.1.2-.3.2-.6.1-.3-.1-1.2-.4-2.3-1.5-1-.9-1.5-1.9-1.6-2.2-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.6-.1 1.6-.7 1.9-1.3.2-.6.2-1.2.1-1.3-.1-.1-.3-.2-.6-.3z"/><path fill="currentColor" d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.3-1.4A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>' +
-      "</a>" +
-      '<a class="blog-share-btn" href="https://twitter.com/intent/tweet?url=' +
-      url +
-      "&text=" +
-      text +
-      '" target="_blank" rel="noopener" title="X" aria-label="Share on X">' +
-      '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M18.2 2H21l-6.6 7.5L22 22h-6.8l-4.4-6.1L5.2 22H2.4l7-8L2 2h7l4 5.6L18.2 2zm-1.2 18h1.9L7.1 3.9H5.1L17 20z"/></svg>' +
-      "</a>" +
-      '<button type="button" class="blog-share-btn" data-copy-link title="Copy link" aria-label="Copy link">' +
-      '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" d="M10 13a5 5 0 0 0 7.1 0l2.1-2.1a5 5 0 0 0-7.1-7.1L11 5"/><path fill="none" stroke="currentColor" stroke-width="2" d="M14 11a5 5 0 0 0-7.1 0L4.8 13.1a5 5 0 0 0 7.1 7.1L13 19"/></svg>' +
-      "</button>" +
-      "</div>"
-    );
-  }
-
   function recentPostsHtml(posts, currentSlug) {
     var items = posts
       .filter(function (p) {
@@ -237,26 +211,6 @@
         .join("") +
       "</ul>"
     );
-  }
-
-  function bindBlogShare() {
-    var btn = document.querySelector("[data-copy-link]");
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      var done = function () {
-        btn.classList.add("is-copied");
-        btn.setAttribute("aria-label", "Link copied");
-        setTimeout(function () {
-          btn.classList.remove("is-copied");
-          btn.setAttribute("aria-label", "Copy link");
-        }, 1600);
-      };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(location.href).then(done).catch(done);
-      } else {
-        done();
-      }
-    });
   }
 
   function renderBlogList(posts) {
@@ -384,7 +338,6 @@
       mins +
       " min read</span>" +
       "</div>" +
-      shareButtons(post.title) +
       (post.imageUrl
         ? '<img class="blog-hero-img" src="' +
           escapeHtml(post.imageUrl) +
@@ -412,7 +365,6 @@
       "</div>" +
       "</aside>" +
       "</div>";
-    bindBlogShare();
   }
 
   async function fetchJson(name) {
