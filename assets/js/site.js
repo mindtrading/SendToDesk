@@ -70,19 +70,32 @@
     });
   }
 
+  function isPlaceholder(value) {
+    if (!value) return true;
+    return /example\.com|example\.org|placeholder|yourdomain|changeme/i.test(
+      String(value)
+    );
+  }
+
   function applySettings(data) {
     if (!data || typeof data !== "object") return;
     if (data.published === false) return;
 
     if (data.siteName) cfg.siteName = String(data.siteName);
     if (data.tagline) cfg.tagline = String(data.tagline);
-    if (data.supportEmail) cfg.email = String(data.supportEmail);
+    if (data.supportEmail && !isPlaceholder(data.supportEmail)) {
+      cfg.email = String(data.supportEmail);
+    }
     if (data.themeColor) cfg.themeColor = String(data.themeColor);
 
     var dl = data.download || {};
     if (dl.version) cfg.version = String(dl.version);
-    if (dl.windowsUrl) cfg.windows = String(dl.windowsUrl);
-    if (dl.playStoreUrl) cfg.play = String(dl.playStoreUrl);
+    if (dl.windowsUrl && !isPlaceholder(dl.windowsUrl)) {
+      cfg.windows = String(dl.windowsUrl);
+    }
+    if (dl.playStoreUrl && !isPlaceholder(dl.playStoreUrl)) {
+      cfg.play = String(dl.playStoreUrl);
+    }
 
     var hero = data.hero || {};
     cfg.hero = {
