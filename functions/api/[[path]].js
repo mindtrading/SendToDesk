@@ -28,6 +28,7 @@ import {
   buildSiteSettings,
   packCatalog,
   buildPackData,
+  resetInstallation,
 } from "../shared/setup.js";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -392,6 +393,21 @@ async function handleSetup(request, env, parts, method) {
       return json({ ok: true, install });
     } catch (e) {
       return json({ error: e.message || "Skip failed" }, 500);
+    }
+  }
+
+  // POST /api/setup/reset — wipe content + install marker (re-test wizard)
+  if (parts[0] === "reset" && method === "POST") {
+    try {
+      const deleted = await resetInstallation(env.CONTENT);
+      return json({
+        ok: true,
+        deleted,
+        needsSetup: true,
+        message: "Installation reset. Log in again to run the setup wizard.",
+      });
+    } catch (e) {
+      return json({ error: e.message || "Reset failed" }, 500);
     }
   }
 

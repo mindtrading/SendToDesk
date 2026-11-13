@@ -18,6 +18,41 @@ export async function writeInstall(bucket, data) {
   return data;
 }
 
+export async function clearInstall(bucket) {
+  await bucket.delete(INSTALL_KEY);
+}
+
+/** Wipe install marker + all public content JSON (for re-testing setup). */
+export async function resetInstallation(bucket) {
+  const deleted = [];
+  await bucket.delete(INSTALL_KEY);
+  deleted.push(INSTALL_KEY);
+
+  let cursor;
+  do {
+    const listed = await bucket.list({ prefix: "content/", cursor, limit: 1000 });
+    for (const obj of listed.objects || []) {
+      if (!obj.key.toLowerCase().endsWith(".json")) continue;
+      await bucket.delete(obj.key);
+      deleted.push(obj.key);
+    }
+    cursor = listed.truncated && listed.cursor ? listed.cursor : undefined;
+  } while (cursor);
+
+  // drafts for a clean slate
+  cursor = undefined;
+  do {
+    const listed = await bucket.list({ prefix: "drafts/", cursor, limit: 1000 });
+    for (const obj of listed.objects || []) {
+      await bucket.delete(obj.key);
+      deleted.push(obj.key);
+    }
+    cursor = listed.truncated && listed.cursor ? listed.cursor : undefined;
+  } while (cursor);
+
+  return deleted;
+}
+
 export function buildSiteSettings(input = {}) {
   const siteName = String(input.siteName || "My Site").trim() || "My Site";
   const tagline = String(input.tagline || "Edit this in Content Studio").trim();
