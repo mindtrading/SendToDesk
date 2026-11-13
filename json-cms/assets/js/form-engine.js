@@ -15,12 +15,24 @@
   let activeEditors = [];
 
   function destroyRichEditors() {
-    activeEditors.forEach((ed) => {
+    activeEditors.forEach((item) => {
       try {
-        ed.destroy();
+        (item.editor || item).destroy();
       } catch (_) {}
     });
     activeEditors = [];
+  }
+
+  function flushRichEditors() {
+    activeEditors.forEach((item) => {
+      try {
+        const editor = item.editor || item;
+        const onInput = item.onInput;
+        if (editor && typeof editor.getContents === "function" && onInput) {
+          onInput(editor.getContents());
+        }
+      } catch (_) {}
+    });
   }
 
   function sunEditorOptions(onInput) {
@@ -64,7 +76,7 @@
       try {
         const editor = window.SUNEDITOR.create(ta, sunEditorOptions(onInput));
         if (ta.value) editor.setContents(ta.value);
-        activeEditors.push(editor);
+        activeEditors.push({ editor, onInput });
       } catch (err) {
         console.warn("SunEditor init failed", err);
         ta.classList.add("input", "textarea", "html-editor");
@@ -664,5 +676,13 @@
     mountRichEditors(container);
   }
 
-  global.FormEngine = { render, clone, typeOf, labelFromKey, fieldKind, destroyRichEditors };
+  global.FormEngine = {
+    render,
+    clone,
+    typeOf,
+    labelFromKey,
+    fieldKind,
+    destroyRichEditors,
+    flushRichEditors,
+  };
 })(window);

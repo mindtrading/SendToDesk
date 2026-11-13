@@ -207,6 +207,9 @@
 
   async function saveFile() {
     if (!state.currentName) return;
+    if (window.FormEngine && typeof FormEngine.flushRichEditors === "function") {
+      FormEngine.flushRichEditors();
+    }
     if (state.mode === "raw") {
       try {
         state.data = JSON.parse($("#raw-editor").value);
@@ -361,10 +364,18 @@
   });
 
   $("#btn-logout").addEventListener("click", async () => {
-    await api("/api/logout", { method: "POST", body: "{}" });
+    if (state.dirty && !confirm("You have unsaved changes. Logout anyway?")) return;
+    try {
+      await api("/api/logout", { method: "POST", body: "{}" });
+    } catch (_) {}
+    if (window.FormEngine && FormEngine.destroyRichEditors) FormEngine.destroyRichEditors();
     state.user = null;
     state.currentName = null;
     state.data = null;
+    state.snapshot = null;
+    state.dirty = false;
+    $("#editor-panel").hidden = true;
+    $("#editor-empty").hidden = false;
     showLogin();
   });
 
@@ -400,6 +411,12 @@
       e.preventDefault();
       if (state.currentName) saveFile();
     }
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (!state.dirty) return;
+    e.preventDefault();
+    e.returnValue = "";
   });
 
   initTheme();
