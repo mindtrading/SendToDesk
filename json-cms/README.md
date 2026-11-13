@@ -7,7 +7,8 @@ Looks like a normal content editor for employees/clients. Data is still JSON in 
 ## Features
 
 - Structured forms (not “JSON jargon” by default)
-- HTML editor for blog/pages (`body`, `html`, `content`…) with toolbar + Preview
+- HTML editor (SunEditor) for blog/pages with **R2 image upload** + insert
+- Locked templates (Blog, FAQ, Pages, Settings, Ads, Team)
 - Smart fields: text, long text, HTML, link, email, date, color, number, toggle, sections, lists
 - List cards with reorder / duplicate / remove
 - **Load demos** samples: settings, blog, ads, pages, FAQ, team, all-types-demo

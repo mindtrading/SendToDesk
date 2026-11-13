@@ -52,3 +52,45 @@ export async function writeJson(bucket, key, data) {
   });
   return body.length;
 }
+
+const IMAGE_TYPES = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
+
+export function extForImage(type, fileName) {
+  if (IMAGE_TYPES[type]) return IMAGE_TYPES[type];
+  const m = String(fileName || "").toLowerCase().match(/\.([a-z0-9]+)$/);
+  if (m && ["jpg", "jpeg", "png", "gif", "webp"].includes(m[1])) {
+    return m[1] === "jpeg" ? "jpg" : m[1];
+  }
+  return null;
+}
+
+export function isAllowedImage(type, fileName) {
+  return !!extForImage(type, fileName);
+}
+
+export function mediaObjectKey(fileName, contentType) {
+  const ext = extForImage(contentType, fileName) || "bin";
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const id = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+  const safeBase = String(fileName || "image")
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "image";
+  return `media/${y}/${m}/${id}-${safeBase}.${ext}`;
+}
+
+export async function writeMedia(bucket, key, data, contentType) {
+  await bucket.put(key, data, {
+    httpMetadata: { contentType: contentType || "application/octet-stream" },
+  });
+  return key;
+}

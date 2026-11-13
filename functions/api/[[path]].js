@@ -12,7 +12,12 @@ import {
   displayName,
   readJson,
   writeJson,
+  isAllowedImage,
+  mediaObjectKey,
+  writeMedia,
 } from "../shared/r2.js";
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 function segmentsFromParams(params) {
   const p = params.path;
@@ -155,6 +160,63 @@ async function handleFiles(request, env, fileParts) {
   return json({ error: "Method not allowed" }, 405);
 }
 
+async function handleUpload(request, env) {
+  const user = await requireUser(request, env);
+  if (!user) return json({ errorMessage: "Unauthorized", result: [] }, 401);
+  if (!env.CONTENT) return json({ errorMessage: "R2 binding missing", result: [] }, 500);
+
+  let form;
+  try {
+    form = await request.formData();
+  } catch {
+    return json({ errorMessage: "Invalid form data", result: [] }, 400);
+  }
+
+  const files = [];
+  for (const [key, value] of form.entries()) {
+    if (value && typeof value === "object" && typeof value.arrayBuffer === "function") {
+      files.push({ field: key, file: value });
+    }
+  }
+
+  if (!files.length) {
+    return json({ errorMessage: "No file uploaded", result: [] }, 400);
+  }
+
+  const origin = new URL(request.url).origin;
+  const result = [];
+
+  for (const { file } of files) {
+    const type = file.type || "application/octet-stream";
+    const name = file.name || "image";
+    if (!isAllowedImage(type, name)) {
+      return json(
+        { errorMessage: "Only JPG, PNG, GIF, or WebP images are allowed", result: [] },
+        400
+      );
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      return json(
+        { errorMessage: "Image must be 5MB or smaller", result: [] },
+        400
+      );
+    }
+
+    const key = mediaObjectKey(name, type);
+    const buf = await file.arrayBuffer();
+    await writeMedia(env.CONTENT, key, buf, type);
+    const publicPath = "/" + key; // /media/YYYY/MM/...
+    result.push({
+      url: origin + publicPath,
+      name: name,
+      size: buf.byteLength,
+    });
+  }
+
+  // SunEditor expected shape
+  return json({ result });
+}
+
 export async function onRequest(context) {
   const { request, env, params } = context;
   const segs = segmentsFromParams(params);
@@ -173,6 +235,10 @@ export async function onRequest(context) {
     const user = await requireUser(request, env);
     if (!user) return json({ authenticated: false }, 401);
     return json({ authenticated: true, user });
+  }
+
+  if (head === "upload" && method === "POST") {
+    return handleUpload(request, env);
   }
 
   if (head === "files") {

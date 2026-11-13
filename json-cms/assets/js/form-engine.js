@@ -55,7 +55,10 @@
       formats: ["p", "blockquote", "h1", "h2", "h3", "h4"],
       fontSize: [12, 14, 16, 18, 20, 24, 32],
       imageAccept: ".jpg, .jpeg, .png, .gif, .webp",
+      imageUploadUrl: "/api/upload",
+      imageUploadSizeLimit: 5 * 1024 * 1024,
       imageUrlInput: true,
+      imageMultipleFile: false,
       linkTargetNewWindow: true,
       stickyToolbar: "transparent",
       callBackSave: function (contents) {
@@ -63,6 +66,10 @@
       },
       onChange: function (contents) {
         if (typeof onInput === "function") onInput(contents);
+      },
+      onImageUploadError: function (errorMessage) {
+        alert(errorMessage || "Image upload failed");
+        return false;
       },
     };
   }
