@@ -81,12 +81,14 @@
         </div>
 
         <div id="editor-panel" hidden>
-          <div class="tabs">
-            <button type="button" class="tab active" id="tab-form">Edit content</button>
-            <button type="button" class="tab" id="tab-raw">Advanced</button>
+          <div class="editor-toolbar">
+            <div class="tabs">
+              <button type="button" class="tab active" id="tab-form">Edit content</button>
+              <button type="button" class="tab" id="tab-raw">Advanced</button>
+            </div>
+            <p class="public-line">Live URL: <a id="public-url" href="#" target="_blank" rel="noopener">/content/…</a></p>
           </div>
-          <p class="public-line">Live URL: <a id="public-url" href="#" target="_blank" rel="noopener">/content/…</a></p>
-          <div id="form-root"></div>
+          <div id="form-root" class="form-root"></div>
           <div id="raw-root" hidden>
             <p class="field-hint advanced-hint">Advanced mode for developers only. Prefer Edit content for normal updates.</p>
             <textarea id="raw-editor" class="input textarea" spellcheck="false"></textarea>

@@ -1,5 +1,5 @@
 /**
- * Content form engine — JSON under the hood, CMS-style fields on screen.
+ * Content form engine — clean CMS editing UI (JSON under the hood).
  */
 (function (global) {
   const HTML_KEYS = /^(html|body|content|article|postBody|descriptionHtml|richText|markup)$/i;
@@ -9,6 +9,9 @@
   const DATE_KEYS = /^(date|publishedAt|updatedAt|createdAt|startDate|endDate)$/i;
   const COLOR_KEYS = /^(color|bg|background|themeColor|accent)$/i;
   const TITLE_KEYS = /^(title|name|label|heading|headline)$/i;
+  const META_KEYS = /^(id|slug|key|uid)$/i;
+
+  const expandedCards = new Set();
 
   function labelFromKey(key) {
     return String(key)
@@ -44,24 +47,6 @@
     return "text";
   }
 
-  function kindLabel(kind) {
-    const map = {
-      html: "HTML",
-      textarea: "Long text",
-      text: "Text",
-      url: "Link",
-      email: "Email",
-      date: "Date",
-      color: "Color",
-      number: "Number",
-      boolean: "Toggle",
-      null: "Empty",
-      object: "Section",
-      array: "List",
-    };
-    return map[kind] || kind;
-  }
-
   function emptyForKind(kind) {
     switch (kind) {
       case "number":
@@ -81,12 +66,12 @@
     }
   }
 
-  function emptyForType(t) {
-    return emptyForKind(t === "string" ? "text" : t);
-  }
-
   function clone(v) {
     return JSON.parse(JSON.stringify(v));
+  }
+
+  function pathKey(path) {
+    return path.join(".");
   }
 
   function el(tag, attrs, children) {
@@ -96,7 +81,6 @@
         if (v === false || v == null) return;
         if (k === "className") node.className = v;
         else if (k === "text") node.textContent = v;
-        else if (k === "html") node.innerHTML = v;
         else if (k.startsWith("on") && typeof v === "function") {
           node.addEventListener(k.slice(2).toLowerCase(), v);
         } else if (k === "checked") node.checked = !!v;
@@ -108,17 +92,6 @@
       node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
     });
     return node;
-  }
-
-  function fieldWrap(key, kind, control, extra) {
-    return el("div", { className: "field field-" + kind }, [
-      el("div", { className: "field-head" }, [
-        el("label", { className: "field-label", text: labelFromKey(key) }),
-        el("span", { className: "type-badge soft", text: kindLabel(kind) }),
-      ]),
-      control,
-      extra || null,
-    ]);
   }
 
   function setAtPath(root, path, nextValue) {
@@ -135,11 +108,19 @@
       for (const k of Object.keys(item)) {
         if (TITLE_KEYS.test(k) && item[k]) return String(item[k]);
       }
-      if (item.id) return String(item.id);
       if (item.slug) return String(item.slug);
+      if (item.id) return String(item.id);
     }
-    if (typeof item === "string" && item) return item.slice(0, 48);
+    if (typeof item === "string" && item) return item.slice(0, 60);
     return "Item " + (index + 1);
+  }
+
+  function itemStatus(item) {
+    if (!item || typeof item !== "object") return null;
+    if (typeof item.published === "boolean") return item.published ? "Published" : "Draft";
+    if (typeof item.active === "boolean") return item.active ? "Active" : "Inactive";
+    if (typeof item.enabled === "boolean") return item.enabled ? "On" : "Off";
+    return null;
   }
 
   function wrapHtmlTag(textarea, before, after) {
@@ -158,9 +139,9 @@
   function htmlEditor(value, onInput) {
     const ta = el("textarea", {
       className: "input textarea html-editor",
-      rows: "12",
+      rows: "10",
       spellcheck: "true",
-      placeholder: "Write HTML content here…",
+      placeholder: "Write your content here (HTML supported)…",
       onInput: (e) => onInput(e.target.value),
     });
     ta.value = value || "";
@@ -174,58 +155,22 @@
     preview.appendChild(frame);
 
     const toolbar = el("div", { className: "html-toolbar" }, [
+      el("button", { type: "button", className: "tool-btn", text: "B", title: "Bold", onClick: () => wrapHtmlTag(ta, "<strong>", "</strong>") }),
+      el("button", { type: "button", className: "tool-btn", text: "I", title: "Italic", onClick: () => wrapHtmlTag(ta, "<em>", "</em>") }),
+      el("button", { type: "button", className: "tool-btn", text: "P", title: "Paragraph", onClick: () => wrapHtmlTag(ta, "<p>", "</p>") }),
+      el("button", { type: "button", className: "tool-btn", text: "H2", title: "Heading", onClick: () => wrapHtmlTag(ta, "<h2>", "</h2>") }),
+      el("button", { type: "button", className: "tool-btn", text: "Link", title: "Link", onClick: () => wrapHtmlTag(ta, '<a href="">', "</a>") }),
+      el("button", { type: "button", className: "tool-btn", text: "List", title: "List", onClick: () => wrapHtmlTag(ta, "<ul>\n  <li>", "</li>\n</ul>") }),
       el("button", {
         type: "button",
-        className: "btn btn-ghost btn-tiny",
-        text: "B",
-        title: "Bold",
-        onClick: () => wrapHtmlTag(ta, "<strong>", "</strong>"),
-      }),
-      el("button", {
-        type: "button",
-        className: "btn btn-ghost btn-tiny",
-        text: "I",
-        title: "Italic",
-        onClick: () => wrapHtmlTag(ta, "<em>", "</em>"),
-      }),
-      el("button", {
-        type: "button",
-        className: "btn btn-ghost btn-tiny",
-        text: "P",
-        title: "Paragraph",
-        onClick: () => wrapHtmlTag(ta, "<p>", "</p>"),
-      }),
-      el("button", {
-        type: "button",
-        className: "btn btn-ghost btn-tiny",
-        text: "H2",
-        title: "Heading",
-        onClick: () => wrapHtmlTag(ta, "<h2>", "</h2>"),
-      }),
-      el("button", {
-        type: "button",
-        className: "btn btn-ghost btn-tiny",
-        text: "Link",
-        title: "Link",
-        onClick: () => wrapHtmlTag(ta, '<a href="">', "</a>"),
-      }),
-      el("button", {
-        type: "button",
-        className: "btn btn-ghost btn-tiny",
-        text: "List",
-        title: "List",
-        onClick: () => wrapHtmlTag(ta, "<ul>\n  <li>", "</li>\n</ul>"),
-      }),
-      el("button", {
-        type: "button",
-        className: "btn btn-secondary btn-tiny",
+        className: "tool-btn tool-btn-accent",
         text: "Preview",
         onClick: () => {
           const show = preview.hidden;
           preview.hidden = !show;
           if (show) {
             frame.srcdoc =
-              "<!doctype html><html><head><style>body{font-family:system-ui,sans-serif;line-height:1.55;padding:12px;color:#111}</style></head><body>" +
+              "<!doctype html><html><head><style>body{font-family:system-ui,sans-serif;line-height:1.55;padding:16px;color:#151a22;max-width:720px;margin:0 auto}img{max-width:100%}</style></head><body>" +
               ta.value +
               "</body></html>";
           }
@@ -236,23 +181,23 @@
     return el("div", { className: "html-editor-wrap" }, [toolbar, ta, preview]);
   }
 
-  function buildNode(value, path, api, keyName) {
-    const key = keyName == null ? "Content" : keyName;
+  function fieldControl(key, value, path, api) {
     const kind = fieldKind(key, value);
 
     if (kind === "text" || kind === "email" || kind === "url" || kind === "date") {
       const input = el("input", {
         className: "input",
         type: kind === "text" ? "text" : kind,
-        placeholder: kind === "url" ? "https://" : kind === "email" ? "name@email.com" : "",
+        placeholder:
+          kind === "url" ? "https://" : kind === "email" ? "name@email.com" : kind === "date" ? "YYYY-MM-DD" : labelFromKey(key),
         onInput: (e) => api.change(path, e.target.value),
       });
       input.value = value || "";
-      return fieldWrap(key, kind, input);
+      return { kind, control: input };
     }
 
     if (kind === "color") {
-      const colorVal = value && value.startsWith("#") ? value : "#" + String(value || "000000").replace(/^#/, "");
+      const colorVal = value && String(value).startsWith("#") ? value : "#" + String(value || "000000").replace(/^#/, "");
       const text = el("input", {
         className: "input",
         type: "text",
@@ -262,32 +207,28 @@
       const picker = el("input", {
         className: "color-picker",
         type: "color",
-        value: /^#[0-9a-fA-F]{6}$/.test(colorVal) ? colorVal : "#000000",
+        value: /^#[0-9a-fA-F]{6}$/.test(colorVal) ? colorVal : "#1d4ed8",
         onInput: (e) => {
           text.value = e.target.value;
           api.change(path, e.target.value);
         },
       });
-      return fieldWrap(key, kind, el("div", { className: "color-row" }, [picker, text]));
+      return { kind, control: el("div", { className: "color-row" }, [picker, text]) };
     }
 
     if (kind === "textarea") {
       const ta = el("textarea", {
         className: "input textarea",
-        rows: "5",
+        rows: "4",
+        placeholder: labelFromKey(key),
         onInput: (e) => api.change(path, e.target.value),
       });
       ta.value = value || "";
-      return fieldWrap(key, kind, ta);
+      return { kind, control: ta };
     }
 
     if (kind === "html") {
-      return fieldWrap(
-        key,
-        kind,
-        htmlEditor(value, (v) => api.change(path, v)),
-        el("p", { className: "field-hint", text: "HTML for blog/pages. Use Preview to check." })
-      );
+      return { kind, control: htmlEditor(value, (v) => api.change(path, v)), wide: true };
     }
 
     if (kind === "number") {
@@ -301,14 +242,11 @@
         },
       });
       input.value = String(value);
-      return fieldWrap(key, kind, input);
+      return { kind, control: input };
     }
 
     if (kind === "boolean") {
-      const text = el("span", {
-        className: "toggle-text",
-        text: value ? "On" : "Off",
-      });
+      const text = el("span", { className: "toggle-text", text: value ? "On" : "Off" });
       const input = el("input", {
         type: "checkbox",
         checked: !!value,
@@ -317,19 +255,17 @@
           api.change(path, e.target.checked);
         },
       });
-      return fieldWrap(
-        key,
+      return {
         kind,
-        el("label", { className: "toggle" }, [input, el("span", { className: "toggle-ui" }), text])
-      );
+        control: el("label", { className: "toggle" }, [input, el("span", { className: "toggle-ui" }), text]),
+      };
     }
 
     if (kind === "null") {
-      return fieldWrap(
-        key,
+      return {
         kind,
-        el("div", { className: "null-row" }, [
-          el("span", { className: "muted", text: "No value yet" }),
+        control: el("div", { className: "null-row" }, [
+          el("span", { className: "muted", text: "Empty" }),
           el(
             "select",
             {
@@ -341,175 +277,346 @@
               },
             },
             [
-              el("option", { value: "", text: "Choose field type…" }),
+              el("option", { value: "", text: "Set type…" }),
               el("option", { value: "text", text: "Text" }),
               el("option", { value: "html", text: "HTML" }),
               el("option", { value: "number", text: "Number" }),
               el("option", { value: "boolean", text: "Toggle" }),
-              el("option", { value: "object", text: "Section" }),
-              el("option", { value: "array", text: "List" }),
             ]
           ),
-        ])
-      );
+        ]),
+      };
     }
 
-    if (kind === "object") {
-      const keys = Object.keys(value);
-      const body = el("div", { className: "object-body" });
-      keys.forEach((k) => {
-        const child = buildNode(value[k], path.concat(k), api, k);
-        child.classList.add("nested-field");
-        child.appendChild(
-          el("button", {
-            type: "button",
-            className: "btn btn-ghost btn-tiny field-remove",
-            text: "Remove",
-            onClick: () => {
+    return null;
+  }
+
+  function primitiveField(key, value, path, api, opts) {
+    const built = fieldControl(key, value, path, api);
+    if (!built) return null;
+    const isMeta = META_KEYS.test(String(key));
+    const node = el("div", {
+      className:
+        "c-field" +
+        (built.wide ? " c-field-wide" : "") +
+        (built.kind === "boolean" ? " c-field-bool" : "") +
+        (isMeta ? " c-field-meta" : ""),
+    }, [
+      el("label", { className: "c-label", text: labelFromKey(key) }),
+      built.control,
+    ]);
+    if (opts && opts.showRemove) {
+      node.appendChild(
+        el("button", {
+          type: "button",
+          className: "c-field-x",
+          text: "×",
+          title: "Remove field",
+          onClick: opts.showRemove,
+        })
+      );
+    }
+    return node;
+  }
+
+  function sortObjectKeys(keys, obj) {
+    const rank = (k) => {
+      if (TITLE_KEYS.test(k)) return 0;
+      if (k === "slug") return 1;
+      if (DATE_KEYS.test(k)) return 2;
+      if (/published|active|enabled/i.test(k)) return 3;
+      if (LONG_KEYS.test(k)) return 4;
+      if (HTML_KEYS.test(k) || looksLikeHtml(obj[k])) return 6;
+      if (META_KEYS.test(k)) return 7;
+      return 5;
+    };
+    return keys.slice().sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  }
+
+  function buildObjectFields(value, path, api, opts) {
+    const options = opts || {};
+    const keys = sortObjectKeys(Object.keys(value), value);
+    const grid = el("div", { className: "c-grid" });
+
+    keys.forEach((k) => {
+      const v = value[k];
+      const kind = fieldKind(k, v);
+      if (kind === "object" || kind === "array") {
+        const nested = buildNode(v, path.concat(k), api, k, {
+          depth: (options.depth || 0) + 1,
+          allowFieldRemove: options.allowFieldRemove,
+        });
+        nested.classList.add("c-field-wide");
+        grid.appendChild(nested);
+        return;
+      }
+      const field = primitiveField(k, v, path.concat(k), api, {
+        showRemove: options.allowFieldRemove
+          ? () => {
               const next = clone(value);
               delete next[k];
               api.structure(path, next);
-            },
-          })
-        );
-        body.appendChild(child);
+            }
+          : null,
+      });
+      if (field) grid.appendChild(field);
+    });
+
+    return grid;
+  }
+
+  function addFieldBar(value, path, api) {
+    const details = el("details", { className: "c-add-details" });
+    details.appendChild(el("summary", { text: "Add field" }));
+    const row = el("div", { className: "c-add-row" }, [
+      el("input", { className: "input", placeholder: "Field name", "data-role": "new-key" }),
+      el(
+        "select",
+        { className: "input select-sm", "data-role": "new-type" },
+        [
+          el("option", { value: "text", text: "Text" }),
+          el("option", { value: "html", text: "HTML" }),
+          el("option", { value: "textarea", text: "Long text" }),
+          el("option", { value: "number", text: "Number" }),
+          el("option", { value: "boolean", text: "Toggle" }),
+          el("option", { value: "url", text: "Link" }),
+          el("option", { value: "object", text: "Group" }),
+          el("option", { value: "array", text: "List" }),
+        ]
+      ),
+      el("button", {
+        type: "button",
+        className: "btn btn-secondary btn-sm",
+        text: "Add",
+        onClick: (e) => {
+          const box = e.currentTarget.parentElement;
+          const nk = box.querySelector('[data-role="new-key"]').value.trim();
+          const nt = box.querySelector('[data-role="new-type"]').value;
+          if (!nk) return;
+          if (Object.prototype.hasOwnProperty.call(value, nk)) {
+            alert("That field already exists");
+            return;
+          }
+          const next = clone(value);
+          next[nk] = emptyForKind(nt);
+          api.structure(path, next);
+        },
+      }),
+    ]);
+    details.appendChild(row);
+    return details;
+  }
+
+  function buildNode(value, path, api, keyName, opts) {
+    const options = opts || {};
+    const key = keyName == null ? "Content" : keyName;
+    const kind = fieldKind(key, value);
+    const depth = options.depth || 0;
+
+    if (kind !== "object" && kind !== "array") {
+      return primitiveField(key, value, path, api, {}) || el("div", { className: "muted", text: "Unsupported" });
+    }
+
+    if (kind === "object") {
+      const isRoot = path.length === 0;
+      const isArrayChild = typeof path[path.length - 1] === "number";
+      const body = buildObjectFields(value, path, api, {
+        depth,
+        allowFieldRemove: !isArrayChild && depth < 2,
       });
 
-      const addRow = el("div", { className: "add-row" }, [
-        el("input", { className: "input", placeholder: "Field name (e.g. title)", "data-role": "new-key" }),
-        el(
-          "select",
-          { className: "input select-sm", "data-role": "new-type" },
-          [
-            el("option", { value: "text", text: "Text" }),
-            el("option", { value: "html", text: "HTML" }),
-            el("option", { value: "textarea", text: "Long text" }),
-            el("option", { value: "number", text: "Number" }),
-            el("option", { value: "boolean", text: "Toggle" }),
-            el("option", { value: "url", text: "Link" }),
-            el("option", { value: "object", text: "Section" }),
-            el("option", { value: "array", text: "List" }),
-          ]
-        ),
-        el("button", {
-          type: "button",
-          className: "btn btn-secondary btn-sm",
-          text: "Add field",
-          onClick: (e) => {
-            const row = e.currentTarget.parentElement;
-            const nk = row.querySelector('[data-role="new-key"]').value.trim();
-            const nt = row.querySelector('[data-role="new-type"]').value;
-            if (!nk) return;
-            if (Object.prototype.hasOwnProperty.call(value, nk)) {
-              alert("That field already exists");
-              return;
-            }
-            const next = clone(value);
-            next[nk] = emptyForKind(nt);
-            api.structure(path, next);
-          },
-        }),
-      ]);
+      if (isRoot || isArrayChild) {
+        const wrap = el("div", { className: isRoot ? "c-root" : "c-flat" }, [body]);
+        if (!isArrayChild) wrap.appendChild(addFieldBar(value, path, api));
+        return wrap;
+      }
 
-      const isRoot = path.length === 0;
-      return el("div", { className: "object-panel" + (isRoot ? " object-root" : "") }, [
-        isRoot
-          ? null
-          : el("div", { className: "panel-title" }, [
-              el("span", { text: labelFromKey(key) }),
-              el("span", { className: "type-badge soft", text: "Section" }),
-            ]),
+      return el("div", { className: "c-group" }, [
+        el("div", { className: "c-group-head" }, [
+          el("h3", { className: "c-group-title", text: labelFromKey(key) }),
+        ]),
         body,
-        addRow,
+        depth < 2 ? addFieldBar(value, path, api) : null,
       ]);
     }
 
-    if (kind === "array") {
-      const list = el("div", { className: "array-body" });
-      const sample = value.length > 0 ? value[0] : { title: "", body: "<p></p>", published: true };
+    // array
+    const list = el("div", { className: "c-list" });
+    const sample =
+      value.length > 0
+        ? value[0]
+        : { title: "New item", slug: "", date: new Date().toISOString().slice(0, 10), published: false, body: "<p></p>" };
 
-      value.forEach((item, index) => {
-        const card = el("div", { className: "array-item" }, [
-          el("div", { className: "array-item-head" }, [
-            el("span", { className: "array-index", text: itemTitle(item, index) }),
-            el("div", { className: "array-item-actions" }, [
-              el("button", {
-                type: "button",
-                className: "btn btn-ghost btn-tiny",
-                text: "↑",
-                disabled: index === 0,
-                onClick: () => {
-                  if (index === 0) return;
-                  const next = value.slice();
-                  const tmp = next[index - 1];
-                  next[index - 1] = next[index];
-                  next[index] = tmp;
-                  api.structure(path, next);
-                },
-              }),
-              el("button", {
-                type: "button",
-                className: "btn btn-ghost btn-tiny",
-                text: "↓",
-                disabled: index === value.length - 1,
-                onClick: () => {
-                  if (index >= value.length - 1) return;
-                  const next = value.slice();
-                  const tmp = next[index + 1];
-                  next[index + 1] = next[index];
-                  next[index] = tmp;
-                  api.structure(path, next);
-                },
-              }),
-              el("button", {
-                type: "button",
-                className: "btn btn-ghost btn-tiny",
-                text: "Duplicate",
-                onClick: () => {
-                  const next = value.slice();
-                  next.splice(index + 1, 0, clone(item));
-                  api.structure(path, next);
-                },
-              }),
-              el("button", {
-                type: "button",
-                className: "btn btn-ghost btn-tiny",
-                text: "Remove",
-                onClick: () => {
-                  const next = value.slice();
-                  next.splice(index, 1);
-                  api.structure(path, next);
-                },
-              }),
-            ]),
-          ]),
+    const isObjectList = value.length === 0 || typeOf(value[0]) === "object";
+
+    value.forEach((item, index) => {
+      const cardPath = path.concat(index);
+      const keyId = pathKey(cardPath);
+      const open = expandedCards.has(keyId) || (value.length <= 2 && index === 0);
+
+      if (!isObjectList) {
+        const row = el("div", { className: "c-chip-row" }, [
+          primitiveField(String(index + 1), item, cardPath, api, {}),
+          el("button", {
+            type: "button",
+            className: "btn btn-ghost btn-tiny",
+            text: "Remove",
+            onClick: () => {
+              const next = value.slice();
+              next.splice(index, 1);
+              api.structure(path, next);
+            },
+          }),
         ]);
-        const child = buildNode(item, path.concat(index), api, String(index));
-        child.classList.add("array-item-body");
-        card.appendChild(child);
-        list.appendChild(card);
-      });
+        list.appendChild(row);
+        return;
+      }
 
-      return el("div", { className: "array-panel" }, [
-        el("div", { className: "panel-title" }, [
-          el("span", { text: labelFromKey(key) }),
-          el("span", { className: "type-badge soft", text: value.length + " items" }),
+      const status = itemStatus(item);
+      const card = el("article", { className: "c-card" + (open ? " is-open" : "") });
+      const chevron = el("span", { className: "c-card-chevron", text: open ? "▾" : "▸" });
+      let bodyEl = null;
+
+      function ensureBody() {
+        if (bodyEl) return bodyEl;
+        bodyEl = el("div", { className: "c-card-body" });
+        bodyEl.appendChild(buildNode(item, cardPath, api, String(index), { depth: depth + 1 }));
+        card.appendChild(bodyEl);
+        return bodyEl;
+      }
+
+      function setOpen(nextOpen) {
+        if (nextOpen) {
+          expandedCards.add(keyId);
+          card.classList.add("is-open");
+          chevron.textContent = "▾";
+          ensureBody();
+          bodyEl.hidden = false;
+        } else {
+          expandedCards.delete(keyId);
+          card.classList.remove("is-open");
+          chevron.textContent = "▸";
+          if (bodyEl) bodyEl.hidden = true;
+        }
+      }
+
+      const head = el("div", { className: "c-card-head" }, [
+        el("button", {
+          type: "button",
+          className: "c-card-toggle",
+          onClick: () => setOpen(!expandedCards.has(keyId)),
+        }, [
+          chevron,
+          el("span", { className: "c-card-title", text: itemTitle(item, index) }),
+          status
+            ? el("span", {
+                className: "c-status " + (/Draft|Inactive|Off/i.test(status) ? "is-draft" : "is-live"),
+                text: status,
+              })
+            : null,
+          el("span", { className: "c-card-num", text: "#" + (index + 1) }),
         ]),
-        list,
+        el("div", { className: "c-card-actions" }, [
+          el("button", {
+            type: "button",
+            className: "btn btn-ghost btn-tiny",
+            text: "Up",
+            disabled: index === 0,
+            onClick: () => {
+              if (index === 0) return;
+              const next = value.slice();
+              const t = next[index - 1];
+              next[index - 1] = next[index];
+              next[index] = t;
+              api.structure(path, next);
+            },
+          }),
+          el("button", {
+            type: "button",
+            className: "btn btn-ghost btn-tiny",
+            text: "Down",
+            disabled: index === value.length - 1,
+            onClick: () => {
+              if (index >= value.length - 1) return;
+              const next = value.slice();
+              const t = next[index + 1];
+              next[index + 1] = next[index];
+              next[index] = t;
+              api.structure(path, next);
+            },
+          }),
+          el("button", {
+            type: "button",
+            className: "btn btn-ghost btn-tiny",
+            text: "Copy",
+            onClick: () => {
+              const next = value.slice();
+              const copy = clone(item);
+              if (copy && typeof copy === "object") {
+                if (copy.title) copy.title = copy.title + " (copy)";
+                if (copy.id) copy.id = String(copy.id) + "-copy";
+                if (copy.slug) copy.slug = String(copy.slug) + "-copy";
+                copy.published = false;
+              }
+              next.splice(index + 1, 0, copy);
+              expandedCards.add(pathKey(path.concat(index + 1)));
+              api.structure(path, next);
+            },
+          }),
+          el("button", {
+            type: "button",
+            className: "btn btn-ghost btn-tiny c-danger",
+            text: "Delete",
+            onClick: () => {
+              if (!confirm("Delete this item?")) return;
+              const next = value.slice();
+              next.splice(index, 1);
+              expandedCards.delete(keyId);
+              api.structure(path, next);
+            },
+          }),
+        ]),
+      ]);
+
+      card.appendChild(head);
+      if (open) {
+        ensureBody();
+        bodyEl.hidden = false;
+      }
+      list.appendChild(card);
+    });
+
+    const singular = labelFromKey(key).replace(/s$/i, "") || "Item";
+
+    return el("section", { className: "c-collection" }, [
+      el("div", { className: "c-collection-head" }, [
+        el("div", { className: "c-collection-titles" }, [
+          el("h2", { className: "c-collection-title", text: labelFromKey(key) }),
+          el("span", { className: "c-collection-count", text: value.length + (value.length === 1 ? " item" : " items") }),
+        ]),
         el("button", {
           type: "button",
           className: "btn btn-secondary btn-sm",
-          text: "Add item",
+          text: "+ Add " + singular.toLowerCase(),
           onClick: () => {
             const next = value.slice();
-            next.push(clone(sample));
+            const neu = clone(sample);
+            if (neu && typeof neu === "object") {
+              if ("title" in neu) neu.title = "New " + singular.toLowerCase();
+              if ("name" in neu) neu.name = "New " + singular.toLowerCase();
+              if ("published" in neu) neu.published = false;
+              if ("active" in neu) neu.active = false;
+              if ("id" in neu) neu.id = "item-" + Date.now().toString(36);
+              if ("slug" in neu) neu.slug = "new-item";
+            }
+            next.push(neu);
+            expandedCards.add(pathKey(path.concat(next.length - 1)));
             api.structure(path, next);
           },
         }),
-      ]);
-    }
-
-    return fieldWrap(key, kind, el("p", { className: "muted", text: "Unsupported field" }));
+      ]),
+      list,
+    ]);
   }
 
   function render(container, data, hooks) {
@@ -530,7 +637,7 @@
     };
 
     container.innerHTML = "";
-    container.appendChild(buildNode(current, [], api, "root"));
+    container.appendChild(buildNode(current, [], api, "root", { depth: 0 }));
   }
 
   global.FormEngine = { render, clone, typeOf, labelFromKey, fieldKind };
