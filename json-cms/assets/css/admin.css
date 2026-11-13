@@ -384,6 +384,8 @@ a {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
+  flex: 1;
 }
 
 .topbar {
@@ -441,9 +443,12 @@ a {
 }
 
 .editor {
-  padding: 20px;
+  padding: 20px 24px;
   flex: 1;
-  max-width: 1100px;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .empty-state {
@@ -830,17 +835,11 @@ a {
 }
 
 .app-shell.sidebar-collapsed {
-  grid-template-columns: 0 minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .app-shell.sidebar-collapsed .sidebar {
-  width: 0;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
+  display: none;
 }
 
 .sidebar-backdrop {
@@ -1303,8 +1302,9 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
 
 .save-bar-inner {
   pointer-events: auto;
-  max-width: 1100px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2232,10 +2232,27 @@ html, body {
   margin-right: 0;
 }
 
-@media (max-width: 1100px) {
-  .editor,
-  .media-library {
-    max-width: none;
+.media-library {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.editor-toolbar {
+  width: 100%;
+}
+
+#editor-panel,
+#form-root,
+.c-root {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+@media (min-width: 1200px) {
+  .c-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2249,8 +2266,7 @@ html, body {
   }
 
   .app-shell.sidebar-collapsed .sidebar {
-    visibility: visible;
-    pointer-events: auto;
+    display: flex;
   }
 
   .sidebar {
@@ -2268,6 +2284,7 @@ html, body {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     visibility: visible;
+    display: flex;
   }
 
   .app-shell.sidebar-open .sidebar {
