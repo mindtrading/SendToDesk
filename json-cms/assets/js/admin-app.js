@@ -114,9 +114,14 @@
     if (draftStr === savedStr) return null;
 
     const when = best.updatedAt ? new Date(best.updatedAt).toLocaleString() : "unknown time";
-    const ok = confirm(
-      "A newer draft was found (" + best.source + ", " + when + ").\n\nRestore draft?"
-    );
+    const ok = await askConfirm({
+      title: "Restore draft?",
+      message:
+        "A newer draft was found (" + best.source + ", " + when + "). Restore it instead of the last saved version?",
+      confirmText: "Restore draft",
+      danger: false,
+      icon: "↺",
+    });
     return ok ? best.data : null;
   }
 
@@ -176,6 +181,75 @@
     clearTimeout(toast._timer);
     toast._timer = setTimeout(() => t.classList.remove("show"), 2800);
   }
+
+  let confirmResolver = null;
+
+  function askConfirm(opts) {
+    const options = opts || {};
+    const modal = $("#confirm-modal");
+    if (!modal) {
+      return Promise.resolve(
+        window.confirm(options.message || options.title || "Are you sure?")
+      );
+    }
+    const title = $("#confirm-title");
+    const message = $("#confirm-message");
+    const okBtn = $("#confirm-ok");
+    const cancelBtn = $("#confirm-cancel");
+    const icon = $("#confirm-icon");
+    const danger = options.danger !== false;
+    if (title) title.textContent = options.title || "Are you sure?";
+    if (message) message.textContent = options.message || "";
+    if (okBtn) {
+      okBtn.textContent = options.confirmText || (danger ? "Delete" : "Confirm");
+      okBtn.className = "btn " + (danger ? "btn-danger" : "");
+    }
+    if (cancelBtn) cancelBtn.textContent = options.cancelText || "Cancel";
+    if (icon) {
+      icon.textContent = options.icon || (danger ? "⌫" : "?");
+      icon.className = "confirm-icon" + (danger ? " is-danger" : "");
+    }
+    modal.hidden = false;
+    modal.classList.add("is-open");
+    if (okBtn) okBtn.focus();
+    return new Promise((resolve) => {
+      confirmResolver = resolve;
+    });
+  }
+
+  function closeConfirm(result) {
+    const modal = $("#confirm-modal");
+    if (modal) {
+      modal.classList.remove("is-open");
+      modal.hidden = true;
+    }
+    if (confirmResolver) {
+      const resolve = confirmResolver;
+      confirmResolver = null;
+      resolve(!!result);
+    }
+  }
+
+  function bindConfirmUi() {
+    const modal = $("#confirm-modal");
+    if (!modal) return;
+    const okBtn = $("#confirm-ok");
+    const cancelBtn = $("#confirm-cancel");
+    if (okBtn) okBtn.addEventListener("click", () => closeConfirm(true));
+    if (cancelBtn) cancelBtn.addEventListener("click", () => closeConfirm(false));
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeConfirm(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (modal.hidden) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeConfirm(false);
+      }
+    });
+  }
+
+  window.CSConfirm = askConfirm;
 
   const setupState = {
     step: 1,
@@ -372,7 +446,14 @@
           window.open(fullUrl, "_blank", "noopener");
         });
         card.querySelector('[data-act="delete"]').addEventListener("click", async () => {
-          if (!confirm("Delete this image from R2?")) return;
+          const ok = await askConfirm({
+            title: "Delete image?",
+            message: "This removes the file from R2 media storage. Links using it will break.",
+            confirmText: "Delete image",
+            danger: true,
+            icon: "⌫",
+          });
+          if (!ok) return;
           try {
             await api("/api/media/" + item.key.replace(/^media\//, ""), { method: "DELETE" });
             toast("Deleted", "ok");
@@ -752,7 +833,16 @@
   }
 
   async function openFile(name) {
-    if (state.dirty && !confirm("Unsaved changes. Discard?")) return;
+    if (state.dirty) {
+      const ok = await askConfirm({
+        title: "Unsaved changes",
+        message: "You have unsaved edits. Discard them and open another file?",
+        confirmText: "Discard & open",
+        danger: true,
+        icon: "!",
+      });
+      if (!ok) return;
+    }
     try {
       const res = await api("/api/files/" + encodeURIComponent(name).replace(/%2F/g, "/"));
       state.currentName = res.name;
@@ -891,7 +981,14 @@
 
   async function discardChanges() {
     if (!state.currentName || !state.dirty) return;
-    if (!confirm("Discard unsaved changes and drafts?")) return;
+    const ok = await askConfirm({
+      title: "Discard changes?",
+      message: "Unsaved edits and drafts for this file will be cleared.",
+      confirmText: "Discard",
+      danger: true,
+      icon: "!",
+    });
+    if (!ok) return;
     try {
       state.data = JSON.parse(state.snapshot || "{}");
       clearLocalDraft(state.currentName);
@@ -950,7 +1047,14 @@
 
   async function restoreVersion(id) {
     if (!state.currentName) return;
-    if (!confirm("Restore this version? Current content will be saved to history first.")) return;
+    const ok = await askConfirm({
+      title: "Restore this version?",
+      message: "Current content will be saved to history first, then this version will be loaded.",
+      confirmText: "Restore",
+      danger: false,
+      icon: "↺",
+    });
+    if (!ok) return;
     try {
       const res = await api(
         "/api/versions/" + encodeURIComponent(state.currentName) + "/restore",
@@ -1045,7 +1149,14 @@
 
   async function deleteFile() {
     if (!state.currentName) return;
-    if (!confirm("Delete " + state.currentName + "?")) return;
+    const ok = await askConfirm({
+      title: "Delete content?",
+      message: "Delete “" + state.currentName + "” from R2? This cannot be undone from the editor.",
+      confirmText: "Delete file",
+      danger: true,
+      icon: "⌫",
+    });
+    if (!ok) return;
     try {
       await api("/api/files/" + encodeURIComponent(state.currentName).replace(/%2F/g, "/"), {
         method: "DELETE",
@@ -1064,7 +1175,15 @@
   }
 
   async function seedSamples() {
-    if (!confirm("Load demo content (settings, blog HTML, ads, pages, FAQ, team, all-types)? Existing demos will be refreshed.")) return;
+    const ok = await askConfirm({
+      title: "Load demo content?",
+      message:
+        "Loads settings, blog, ads, pages, FAQ, team, and all-types demos. Existing demo files with the same names will be refreshed.",
+      confirmText: "Load demos",
+      danger: false,
+      icon: "↓",
+    });
+    if (!ok) return;
     const samples = [
       "site-settings.json",
       "blog.json",
@@ -1128,7 +1247,16 @@
   });
 
   $("#btn-logout").addEventListener("click", async () => {
-    if (state.dirty && !confirm("You have unsaved changes. Logout anyway?")) return;
+    if (state.dirty) {
+      const ok = await askConfirm({
+        title: "Logout anyway?",
+        message: "You have unsaved changes that will be lost if you logout now.",
+        confirmText: "Logout",
+        danger: true,
+        icon: "!",
+      });
+      if (!ok) return;
+    }
     try {
       await api("/api/logout", { method: "POST", body: "{}" });
     } catch (_) {}
@@ -1211,5 +1339,6 @@
   initTheme();
   bindSetupUi();
   bindMediaUi();
+  bindConfirmUi();
   checkAuth();
 })();

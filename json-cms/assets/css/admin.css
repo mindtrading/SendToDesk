@@ -2045,3 +2045,83 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
   color: var(--muted);
   padding: 24px;
 }
+
+/* ===== Sweet confirm modal ===== */
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(10, 14, 20, 0.55);
+  backdrop-filter: blur(8px);
+  animation: confirm-fade 0.18s ease;
+}
+
+.confirm-modal[hidden] {
+  display: none !important;
+}
+
+@keyframes confirm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.confirm-card {
+  width: min(400px, 100%);
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 28px 24px 22px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  animation: confirm-pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+
+@keyframes confirm-pop {
+  from { transform: translateY(10px) scale(0.96); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.confirm-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  font-weight: 800;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.confirm-icon.is-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.confirm-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.confirm-message {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.confirm-actions .btn {
+  min-width: 110px;
+}

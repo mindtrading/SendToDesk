@@ -708,8 +708,16 @@
             type: "button",
             className: "btn btn-ghost btn-tiny c-danger",
             text: "Delete",
-            onClick: () => {
-              if (!confirm("Delete this item?")) return;
+            onClick: async () => {
+              const ask = window.CSConfirm || ((o) => Promise.resolve(window.confirm(o.message || o.title)));
+              const ok = await ask({
+                title: "Delete item?",
+                message: "Remove this item from the list.",
+                confirmText: "Delete",
+                danger: true,
+                icon: "⌫",
+              });
+              if (!ok) return;
               const next = value.slice();
               next.splice(index, 1);
               expandedCards.delete(keyId);
@@ -978,8 +986,16 @@
               type: "button",
               className: "btn btn-ghost btn-tiny c-danger",
               text: "Delete",
-              onClick: () => {
-                if (!confirm("Delete this " + itemLabel.toLowerCase() + "?")) return;
+              onClick: async () => {
+                const ask = window.CSConfirm || ((o) => Promise.resolve(window.confirm(o.message || o.title)));
+                const ok = await ask({
+                  title: "Delete " + itemLabel.toLowerCase() + "?",
+                  message: "Remove this " + itemLabel.toLowerCase() + " from the list.",
+                  confirmText: "Delete",
+                  danger: true,
+                  icon: "⌫",
+                });
+                if (!ok) return;
                 const next = value.slice();
                 next.splice(index, 1);
                 expandedCards.delete(keyId);
