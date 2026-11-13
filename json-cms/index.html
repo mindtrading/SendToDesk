@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=33" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=34" />
 </head>
 <body>
   <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
@@ -36,13 +36,51 @@
   <div id="login-view" class="login-view">
     <div class="login-stack">
       <form id="login-form" class="login-card" autocomplete="on">
-        <div class="brand-mark"><span class="dot"></span><strong>CorePanel</strong></div>
-        <h1>Sign in</h1>
-        <p class="sub">Edit website content — pages, blog, ads, and settings.</p>
+        <div class="login-chrome" aria-hidden="true">
+          <span class="login-dot login-dot-red"></span>
+          <span class="login-dot login-dot-amber"></span>
+          <span class="login-dot login-dot-green"></span>
+          <code class="login-path">~/corepanel · auth</code>
+        </div>
+        <div class="login-brand">
+          <img
+            id="login-logo"
+            class="login-logo"
+            src="assets/img/core-panel-lightmode.png?v=1"
+            alt="CorePanel"
+            width="220"
+            height="48"
+            data-logo-light="assets/img/core-panel-lightmode.png?v=1"
+            data-logo-dark="assets/img/core-panel-darkmode.png?v=1"
+          />
+        </div>
+        <p class="login-kicker"><span>//</span> secure workspace</p>
+        <h1>Sign in to CorePanel</h1>
+        <p class="sub">Publish pages, posts, and settings with quiet precision — your live site, one calm control room.</p>
         <div class="stack">
-          <input id="username" class="input" name="username" placeholder="Username" required autocomplete="username" />
-          <input id="password" class="input" name="password" type="password" placeholder="Password" required autocomplete="current-password" />
-          <button class="btn btn-block" type="submit">Sign in</button>
+          <label class="login-field" for="username">
+            <span class="login-label">username</span>
+            <input id="username" class="input login-input" name="username" placeholder="admin" required autocomplete="username" />
+          </label>
+          <label class="login-field" for="password">
+            <span class="login-label">password</span>
+            <div class="password-field">
+              <input id="password" class="input login-input" name="password" type="password" placeholder="••••••••" required autocomplete="current-password" />
+              <button type="button" class="password-toggle" id="btn-password-toggle" aria-label="Show password" aria-pressed="false" title="Show password">
+                <svg class="icon-eye" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg class="icon-eye-off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                  <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              </button>
+            </div>
+          </label>
+          <button class="btn btn-block login-submit" type="submit">Continue <span aria-hidden="true">→</span></button>
         </div>
         <p id="login-error" class="error" hidden></p>
       </form>
@@ -359,6 +397,6 @@
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
   <script src="assets/js/form-engine.js?v=14"></script>
-  <script src="assets/js/admin-app.js?v=23"></script>
+  <script src="assets/js/admin-app.js?v=24"></script>
 </body>
 </html>

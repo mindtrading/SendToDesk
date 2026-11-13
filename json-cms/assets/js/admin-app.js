@@ -138,19 +138,35 @@
     document.querySelectorAll("[data-theme-set]").forEach((btn) => {
       btn.classList.toggle("active", btn.getAttribute("data-theme-set") === next);
     });
-    const logo = $("#side-logo");
-    if (logo) {
+    document.querySelectorAll("#side-logo, #login-logo").forEach((logo) => {
       const light = logo.getAttribute("data-logo-light");
       const dark = logo.getAttribute("data-logo-dark");
       const src = next === "dark" ? dark : light;
       if (src && logo.getAttribute("src") !== src) logo.setAttribute("src", src);
-    }
+    });
   }
 
   function initTheme() {
     applyTheme(getTheme());
     document.querySelectorAll("[data-theme-set]").forEach((btn) => {
       btn.addEventListener("click", () => applyTheme(btn.getAttribute("data-theme-set")));
+    });
+  }
+
+  function initPasswordToggle() {
+    const input = $("#password");
+    const btn = $("#btn-password-toggle");
+    if (!input || !btn) return;
+    const eye = btn.querySelector(".icon-eye");
+    const eyeOff = btn.querySelector(".icon-eye-off");
+    btn.addEventListener("click", () => {
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      btn.setAttribute("aria-pressed", show ? "true" : "false");
+      btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      btn.title = show ? "Hide password" : "Show password";
+      if (eye) eye.hidden = show;
+      if (eyeOff) eyeOff.hidden = !show;
     });
   }
 
@@ -1436,6 +1452,7 @@
   });
 
   initTheme();
+  initPasswordToggle();
   bindSetupUi();
   bindMediaUi();
   bindSidebarUi();
