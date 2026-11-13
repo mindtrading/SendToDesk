@@ -1,0 +1,22 @@
+{
+  "posts": [
+    {
+      "id": "welcome",
+      "title": "Welcome to SendToDesk",
+      "slug": "welcome",
+      "date": "2026-03-20",
+      "published": true,
+      "excerpt": "Send passport photos and scans from Android to Windows over Wi‑Fi.",
+      "body": "This is a sample post. Edit it from JSON CMS.\n\nAdd more posts with the Add item button."
+    },
+    {
+      "id": "install-guide",
+      "title": "How to install on Windows",
+      "slug": "install-windows",
+      "date": "2026-03-18",
+      "published": true,
+      "excerpt": "Download the zip, extract, run the app.",
+      "body": "1. Download the Windows build\n2. Extract the zip\n3. Run SendToDesk\n4. Connect from the Android app"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "json-cms",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Generic JSON CMS for Cloudflare Pages + R2",
+  "scripts": {
+    "dev": "npx wrangler pages dev . --r2=CONTENT",
+    "deploy": "npx wrangler pages deploy . --project-name=json-cms"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

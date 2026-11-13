@@ -67,6 +67,10 @@ python3 -m http.server 8080
 
 Open `http://127.0.0.1:8080`
 
+## JSON CMS (optional)
+
+Generic admin to edit any JSON in Cloudflare R2 (auto form UI): see [`json-cms/README.md`](json-cms/README.md) and [`docs/JSON_CMS_BN.md`](docs/JSON_CMS_BN.md). Deploy `json-cms/` as its own Pages project; keep this marketing site static.
+
 ## Before going live
 
 1. Set `email`, `version`, and zip filenames in `assets/js/site.js`

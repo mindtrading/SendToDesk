@@ -1,0 +1,13 @@
+name = "json-cms"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "."
+
+[[r2_buckets]]
+binding = "CONTENT"
+bucket_name = "json-cms-content"
+preview_bucket_name = "json-cms-content-preview"
+
+# Set secrets in Cloudflare Pages → Settings → Environment variables:
+#   ADMIN_USER      (default: admin)
+#   ADMIN_PASSWORD  (required)
+#   SESSION_SECRET  (required, long random string)

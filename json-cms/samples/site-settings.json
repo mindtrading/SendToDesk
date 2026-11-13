@@ -1,0 +1,16 @@
+{
+  "siteName": "SendToDesk",
+  "tagline": "Phone to Windows PC over Wi‑Fi",
+  "supportEmail": "support@example.com",
+  "download": {
+    "windowsUrl": "https://example.com/SendToDesk.zip",
+    "version": "1.0.0",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.docs.scan.sendtodesk"
+  },
+  "hero": {
+    "title": "Send scans to your PC instantly",
+    "subtitle": "No cloud. Local Wi‑Fi only.",
+    "ctaLabel": "Download now"
+  },
+  "published": true
+}
