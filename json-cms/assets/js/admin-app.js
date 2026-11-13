@@ -73,6 +73,8 @@
     $("#app-view").hidden = true;
     const floatToggle = document.querySelector(".theme-toggle-float");
     if (floatToggle) floatToggle.hidden = false;
+    const saveBar = $("#save-bar");
+    if (saveBar) saveBar.hidden = true;
   }
 
   function showApp() {
@@ -150,6 +152,9 @@
       $("#current-file").textContent = prettyName(res.name);
       $("#public-url").textContent = "/content/" + res.name;
       $("#public-url").href = "/content/" + res.name;
+      $("#save-bar").hidden = false;
+      $("#save-bar-file").textContent = prettyName(res.name);
+      state.snapshot = JSON.stringify(res.data);
       renderEditor();
       renderFileList();
       setDirty(false);
@@ -159,8 +164,21 @@
   }
 
   function setDirty(v) {
-    state.dirty = v;
-    $("#dirty-dot").hidden = !v;
+    state.dirty = !!v;
+    const dirty = state.dirty;
+    $("#dirty-dot").hidden = !dirty;
+    const status = $("#save-bar-status");
+    if (status) {
+      status.textContent = dirty ? "Unsaved changes" : "All changes saved";
+      status.classList.toggle("is-dirty", dirty);
+      status.classList.toggle("is-saved", !dirty);
+    }
+    const discard = $("#btn-discard");
+    if (discard) discard.hidden = !dirty;
+    document.querySelectorAll(".btn-save-main, .btn-save-top").forEach((btn) => {
+      btn.classList.toggle("is-pulse", dirty);
+      btn.disabled = false;
+    });
   }
 
   function renderEditor() {
@@ -197,14 +215,39 @@
         return;
       }
     }
+    const buttons = document.querySelectorAll(".btn-save-main, .btn-save-top");
+    buttons.forEach((btn) => {
+      btn.disabled = true;
+      btn.dataset.label = btn.textContent;
+      btn.textContent = "Saving…";
+    });
     try {
       await api("/api/files/" + encodeURIComponent(state.currentName).replace(/%2F/g, "/"), {
         method: "PUT",
         body: JSON.stringify({ data: state.data }),
       });
+      state.snapshot = JSON.stringify(state.data);
       setDirty(false);
-      toast("Saved", "ok");
+      toast("Saved · " + prettyName(state.currentName), "ok");
       await refreshFiles();
+    } catch (e) {
+      toast(e.message, "error");
+    } finally {
+      buttons.forEach((btn) => {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.label || "Save changes";
+      });
+    }
+  }
+
+  async function discardChanges() {
+    if (!state.currentName || !state.dirty) return;
+    if (!confirm("Discard unsaved changes?")) return;
+    try {
+      state.data = JSON.parse(state.snapshot || "{}");
+      setDirty(false);
+      renderEditor();
+      toast("Changes discarded", "ok");
     } catch (e) {
       toast(e.message, "error");
     }
@@ -245,6 +288,7 @@
       state.dirty = false;
       $("#editor-panel").hidden = true;
       $("#editor-empty").hidden = false;
+      $("#save-bar").hidden = true;
       toast("Deleted", "ok");
       await refreshFiles();
     } catch (e) {
@@ -328,6 +372,10 @@
   $("#btn-new").addEventListener("click", createFile);
   $("#btn-seed").addEventListener("click", seedSamples);
   $("#btn-save").addEventListener("click", saveFile);
+  const saveTop = $("#btn-save-top");
+  if (saveTop) saveTop.addEventListener("click", saveFile);
+  const discardBtn = $("#btn-discard");
+  if (discardBtn) discardBtn.addEventListener("click", discardChanges);
   $("#btn-delete").addEventListener("click", deleteFile);
   $("#tab-form").addEventListener("click", () => {
     if (state.mode === "raw") {
