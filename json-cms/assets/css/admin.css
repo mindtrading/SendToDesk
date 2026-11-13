@@ -1423,3 +1423,39 @@ html[data-theme="dark"] .sun-wrap .sun-editor-editable a {
   border-top: 1px solid var(--line);
   padding-top: 14px;
 }
+
+/* ===== Draft + history ===== */
+.draft-status {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.draft-status.is-ok {
+  color: var(--ok);
+}
+
+.draft-status.is-warn {
+  color: var(--warn);
+}
+
+.history-list {
+  display: grid;
+  gap: 8px;
+  max-height: 50vh;
+  overflow: auto;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-soft);
+}
+
+.history-row strong {
+  font-size: 0.9rem;
+}

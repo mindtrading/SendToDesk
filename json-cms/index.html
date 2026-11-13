@@ -88,6 +88,7 @@
             </div>
             <div class="editor-toolbar-right">
               <p class="public-line">Live URL: <a id="public-url" href="#" target="_blank" rel="noopener">/content/…</a></p>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-history">History</button>
               <button type="button" class="btn btn-save-top" id="btn-save-top">Save changes</button>
             </div>
           </div>
@@ -104,6 +105,7 @@
           <div class="save-bar-info">
             <span id="save-bar-status" class="save-bar-status is-saved">All changes saved</span>
             <span id="save-bar-file" class="save-bar-file"></span>
+            <span id="draft-status" class="draft-status" hidden></span>
           </div>
           <div class="save-bar-actions">
             <span class="save-bar-hint">⌘/Ctrl + S</span>
@@ -116,6 +118,17 @@
   </div>
 
   <div id="toast" class="toast" role="status"></div>
+
+  <div id="history-modal" class="tpl-modal" hidden>
+    <div class="tpl-modal-card" role="dialog" aria-modal="true" aria-labelledby="history-title">
+      <div class="tpl-modal-head">
+        <h2 id="history-title">Version history</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="history-close">Close</button>
+      </div>
+      <p class="tpl-modal-sub">Previous saved copies. Restore if something went wrong.</p>
+      <div id="history-list" class="history-list"></div>
+    </div>
+  </div>
 
   <div id="tpl-modal" class="tpl-modal" hidden>
     <div class="tpl-modal-card" role="dialog" aria-modal="true" aria-labelledby="tpl-modal-title">
@@ -135,7 +148,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
-  <script src="assets/js/form-engine.js?v=10"></script>
-  <script src="assets/js/admin-app.js?v=10"></script>
+  <script src="assets/js/form-engine.js?v=11"></script>
+  <script src="assets/js/admin-app.js?v=11"></script>
 </body>
 </html>

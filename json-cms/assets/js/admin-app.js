@@ -8,10 +8,116 @@
     mode: "form", // form | raw
     template: null,
     pickTemplateId: "blog",
+    draftTimer: null,
+    lastDraftAt: null,
+    autosaveBusy: false,
   };
 
   const THEME_KEY = "cs-theme";
+  const DRAFT_PREFIX = "cs-draft:";
+  const AUTOSAVE_MS = 8000;
   const $ = (sel) => document.querySelector(sel);
+
+  function draftLocalKey(name) {
+    return DRAFT_PREFIX + name;
+  }
+
+  function writeLocalDraft(name, data) {
+    try {
+      localStorage.setItem(
+        draftLocalKey(name),
+        JSON.stringify({ updatedAt: new Date().toISOString(), data })
+      );
+    } catch (_) {}
+  }
+
+  function readLocalDraft(name) {
+    try {
+      const raw = localStorage.getItem(draftLocalKey(name));
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function clearLocalDraft(name) {
+    try {
+      localStorage.removeItem(draftLocalKey(name));
+    } catch (_) {}
+  }
+
+  function setDraftStatus(text, kind) {
+    const el = $("#draft-status");
+    if (!el) return;
+    if (!text) {
+      el.hidden = true;
+      el.textContent = "";
+      return;
+    }
+    el.hidden = false;
+    el.textContent = text;
+    el.classList.toggle("is-ok", kind === "ok");
+    el.classList.toggle("is-warn", kind === "warn");
+  }
+
+  function scheduleAutosave() {
+    if (state.draftTimer) clearTimeout(state.draftTimer);
+    state.draftTimer = setTimeout(() => {
+      autosaveDraft().catch(() => {});
+    }, AUTOSAVE_MS);
+  }
+
+  async function autosaveDraft() {
+    if (!state.currentName || !state.dirty || state.autosaveBusy) return;
+    if (window.FormEngine && FormEngine.flushRichEditors) FormEngine.flushRichEditors();
+    state.autosaveBusy = true;
+    setDraftStatus("Saving draft…", "warn");
+    try {
+      writeLocalDraft(state.currentName, state.data);
+      await api("/api/drafts/" + encodeURIComponent(state.currentName), {
+        method: "PUT",
+        body: JSON.stringify({ data: state.data }),
+      });
+      state.lastDraftAt = new Date();
+      setDraftStatus(
+        "Draft saved · " + state.lastDraftAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+        "ok"
+      );
+    } catch (e) {
+      setDraftStatus("Local draft only · " + (e.message || "server draft failed"), "warn");
+    } finally {
+      state.autosaveBusy = false;
+    }
+  }
+
+  async function maybeOfferDraft(name, savedData) {
+    let serverDraft = null;
+    try {
+      const res = await api("/api/drafts/" + encodeURIComponent(name));
+      serverDraft = res.draft;
+    } catch (_) {}
+    const localDraft = readLocalDraft(name);
+    const candidates = [];
+    if (serverDraft && serverDraft.data) {
+      candidates.push({ source: "server", updatedAt: serverDraft.updatedAt, data: serverDraft.data });
+    }
+    if (localDraft && localDraft.data) {
+      candidates.push({ source: "local", updatedAt: localDraft.updatedAt, data: localDraft.data });
+    }
+    if (!candidates.length) return null;
+
+    candidates.sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+    const best = candidates[0];
+    const savedStr = JSON.stringify(savedData);
+    const draftStr = JSON.stringify(best.data);
+    if (draftStr === savedStr) return null;
+
+    const when = best.updatedAt ? new Date(best.updatedAt).toLocaleString() : "unknown time";
+    const ok = confirm(
+      "A newer draft was found (" + best.source + ", " + when + ").\n\nRestore draft?"
+    );
+    return ok ? best.data : null;
+  }
 
   function getTheme() {
     return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
@@ -151,14 +257,22 @@
         ? ContentTemplates.resolve(res.name, res.data)
         : null;
       state.template = resolved;
-      state.data =
+      let data =
         resolved && resolved.fields && window.ContentTemplates
           ? ContentTemplates.applyDefaults(res.data, resolved)
           : res.data;
-      if (state.template && state.data && !state.data._template) {
-        state.data._template = state.template.id;
+      if (state.template && data && !data._template) {
+        data._template = state.template.id;
       }
-      state.dirty = false;
+      const draftData = await maybeOfferDraft(res.name, data);
+      if (draftData) {
+        data =
+          resolved && resolved.fields && window.ContentTemplates
+            ? ContentTemplates.applyDefaults(draftData, resolved)
+            : draftData;
+      }
+      state.data = data;
+      state.dirty = !!draftData;
       $("#editor-empty").hidden = true;
       $("#editor-panel").hidden = false;
       $("#current-file").textContent = prettyName(res.name);
@@ -166,10 +280,15 @@
       $("#public-url").href = "/content/" + res.name;
       $("#save-bar").hidden = false;
       $("#save-bar-file").textContent = prettyName(res.name);
-      state.snapshot = JSON.stringify(state.data);
+      state.snapshot = JSON.stringify(
+        resolved && resolved.fields && window.ContentTemplates
+          ? ContentTemplates.applyDefaults(res.data, resolved)
+          : res.data
+      );
       renderEditor();
       renderFileList();
-      setDirty(false);
+      setDirty(!!draftData);
+      setDraftStatus(draftData ? "Draft restored — save to publish" : "", draftData ? "warn" : "ok");
     } catch (e) {
       toast(e.message, "error");
     }
@@ -191,6 +310,7 @@
       btn.classList.toggle("is-pulse", dirty);
       btn.disabled = false;
     });
+    if (dirty) scheduleAutosave();
   }
 
   function renderEditor() {
@@ -206,10 +326,12 @@
         onChange: (next) => {
           state.data = next;
           setDirty(true);
+          writeLocalDraft(state.currentName, next);
         },
         onStructure: (next) => {
           state.data = next;
           setDirty(true);
+          writeLocalDraft(state.currentName, next);
           renderEditor();
         },
       });
@@ -238,12 +360,20 @@
       btn.textContent = "Saving…";
     });
     try {
-      await api("/api/files/" + encodeURIComponent(state.currentName).replace(/%2F/g, "/"), {
-        method: "PUT",
-        body: JSON.stringify({ data: state.data }),
-      });
+      const res = await api(
+        "/api/files/" + encodeURIComponent(state.currentName).replace(/%2F/g, "/"),
+        {
+          method: "PUT",
+          body: JSON.stringify({ data: state.data }),
+        }
+      );
       state.snapshot = JSON.stringify(state.data);
+      clearLocalDraft(state.currentName);
       setDirty(false);
+      setDraftStatus(
+        res.version ? "Published · history saved" : "Published",
+        "ok"
+      );
       toast("Saved · " + prettyName(state.currentName), "ok");
       await refreshFiles();
     } catch (e) {
@@ -258,12 +388,87 @@
 
   async function discardChanges() {
     if (!state.currentName || !state.dirty) return;
-    if (!confirm("Discard unsaved changes?")) return;
+    if (!confirm("Discard unsaved changes and drafts?")) return;
     try {
       state.data = JSON.parse(state.snapshot || "{}");
+      clearLocalDraft(state.currentName);
+      try {
+        await api("/api/drafts/" + encodeURIComponent(state.currentName), { method: "DELETE" });
+      } catch (_) {}
       setDirty(false);
+      setDraftStatus("");
       renderEditor();
       toast("Changes discarded", "ok");
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  }
+
+  async function openHistory() {
+    if (!state.currentName) return;
+    const modal = $("#history-modal");
+    const list = $("#history-list");
+    list.innerHTML = '<p class="muted">Loading…</p>';
+    modal.hidden = false;
+    try {
+      const res = await api("/api/versions/" + encodeURIComponent(state.currentName));
+      const versions = res.versions || [];
+      if (!versions.length) {
+        list.innerHTML = '<p class="muted">No history yet. Save once to create a version.</p>';
+        return;
+      }
+      list.innerHTML = "";
+      versions.forEach((v) => {
+        const row = document.createElement("div");
+        row.className = "history-row";
+        const when = v.savedAt ? new Date(v.savedAt).toLocaleString() : v.id;
+        row.innerHTML =
+          "<div><strong>" +
+          escapeHtml(when) +
+          '</strong><span class="muted"> · ' +
+          escapeHtml(v.id) +
+          "</span></div>";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn-secondary btn-sm";
+        btn.textContent = "Restore";
+        btn.addEventListener("click", () => restoreVersion(v.id));
+        row.appendChild(btn);
+        list.appendChild(row);
+      });
+    } catch (e) {
+      list.innerHTML = '<p class="error">' + escapeHtml(e.message) + "</p>";
+    }
+  }
+
+  function closeHistory() {
+    $("#history-modal").hidden = true;
+  }
+
+  async function restoreVersion(id) {
+    if (!state.currentName) return;
+    if (!confirm("Restore this version? Current content will be saved to history first.")) return;
+    try {
+      const res = await api(
+        "/api/versions/" + encodeURIComponent(state.currentName) + "/restore",
+        {
+          method: "POST",
+          body: JSON.stringify({ id }),
+        }
+      );
+      let data = res.data;
+      if (state.template && state.template.fields && window.ContentTemplates) {
+        data = ContentTemplates.applyDefaults(data, state.template);
+      }
+      state.data = data;
+      state.snapshot = JSON.stringify(data);
+      clearLocalDraft(state.currentName);
+      setDirty(false);
+      setDraftStatus("Restored from history", "ok");
+      renderEditor();
+      closeHistory();
+      toast("Restored version", "ok");
+      await refreshFiles();
     } catch (e) {
       toast(e.message, "error");
     }
@@ -453,6 +658,16 @@
   if (saveTop) saveTop.addEventListener("click", saveFile);
   const discardBtn = $("#btn-discard");
   if (discardBtn) discardBtn.addEventListener("click", discardChanges);
+  const historyBtn = $("#btn-history");
+  if (historyBtn) historyBtn.addEventListener("click", openHistory);
+  const historyClose = $("#history-close");
+  if (historyClose) historyClose.addEventListener("click", closeHistory);
+  const historyModal = $("#history-modal");
+  if (historyModal) {
+    historyModal.addEventListener("click", (e) => {
+      if (e.target === historyModal) closeHistory();
+    });
+  }
   $("#btn-delete").addEventListener("click", deleteFile);
   $("#tab-form").addEventListener("click", () => {
     if (state.mode === "raw") {
@@ -470,7 +685,12 @@
     state.mode = "raw";
     renderEditor();
   });
-  $("#raw-editor").addEventListener("input", () => setDirty(true));
+  $("#raw-editor").addEventListener("input", () => {
+    try {
+      state.data = JSON.parse($("#raw-editor").value);
+    } catch (_) {}
+    setDirty(true);
+  });
 
   document.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "s") {

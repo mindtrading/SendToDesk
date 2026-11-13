@@ -94,3 +94,84 @@ export async function writeMedia(bucket, key, data, contentType) {
   });
   return key;
 }
+
+const MAX_VERSIONS = 30;
+
+export function draftKey(fileName) {
+  const name = displayName(normalizeKey(fileName));
+  return `drafts/${name}`;
+}
+
+export function versionsPrefix(fileName) {
+  const name = displayName(normalizeKey(fileName));
+  return `versions/${name}/`;
+}
+
+export function versionObjectKey(fileName, id) {
+  return versionsPrefix(fileName) + id + ".json";
+}
+
+export async function saveVersionSnapshot(bucket, fileName, data, meta = {}) {
+  const id = new Date().toISOString().replace(/[:.]/g, "-");
+  const key = versionObjectKey(fileName, id);
+  const payload = {
+    id,
+    savedAt: new Date().toISOString(),
+    file: displayName(normalizeKey(fileName)),
+    user: meta.user || null,
+    data,
+  };
+  await writeJson(bucket, key, payload);
+
+  // prune oldest beyond MAX_VERSIONS
+  const listed = await bucket.list({ prefix: versionsPrefix(fileName), limit: 1000 });
+  const objs = (listed.objects || [])
+    .filter((o) => o.key.endsWith(".json"))
+    .sort((a, b) => (a.uploaded > b.uploaded ? 1 : -1));
+  if (objs.length > MAX_VERSIONS) {
+    const toDelete = objs.slice(0, objs.length - MAX_VERSIONS);
+    await Promise.all(toDelete.map((o) => bucket.delete(o.key)));
+  }
+  return { id, savedAt: payload.savedAt };
+}
+
+export async function listVersions(bucket, fileName) {
+  const listed = await bucket.list({ prefix: versionsPrefix(fileName), limit: 1000 });
+  const items = [];
+  for (const obj of listed.objects || []) {
+    if (!obj.key.endsWith(".json")) continue;
+    const id = obj.key.split("/").pop().replace(/\.json$/i, "");
+    items.push({
+      id,
+      savedAt: obj.uploaded ? new Date(obj.uploaded).toISOString() : null,
+      size: obj.size,
+    });
+  }
+  items.sort((a, b) => String(b.savedAt || "").localeCompare(String(a.savedAt || "")));
+  return items;
+}
+
+export async function readVersion(bucket, fileName, id) {
+  const safeId = String(id || "").replace(/[^a-zA-Z0-9_-]/g, "");
+  if (!safeId) return null;
+  return readJson(bucket, versionObjectKey(fileName, safeId));
+}
+
+export async function readDraft(bucket, fileName) {
+  return readJson(bucket, draftKey(fileName));
+}
+
+export async function writeDraft(bucket, fileName, data, meta = {}) {
+  const payload = {
+    file: displayName(normalizeKey(fileName)),
+    updatedAt: new Date().toISOString(),
+    user: meta.user || null,
+    data,
+  };
+  await writeJson(bucket, draftKey(fileName), payload);
+  return payload;
+}
+
+export async function deleteDraft(bucket, fileName) {
+  await bucket.delete(draftKey(fileName));
+}
