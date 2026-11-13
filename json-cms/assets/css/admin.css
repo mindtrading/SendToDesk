@@ -802,7 +802,7 @@ a {
   border-color: var(--accent);
 }
 
-/* Single hamburger — 3 bars via CSS only (no second close icon) */
+/* Hamburger ↔ close (X) on the same button */
 .sidebar-toggle .hb-bars {
   position: relative;
   width: 18px;
@@ -819,6 +819,7 @@ a {
   height: 2px;
   border-radius: 1px;
   background: currentColor;
+  transition: transform 0.2s ease, top 0.2s ease, bottom 0.2s ease, box-shadow 0.2s ease, opacity 0.15s ease;
 }
 
 .sidebar-toggle .hb-bars::before {
@@ -828,6 +829,19 @@ a {
 
 .sidebar-toggle .hb-bars::after {
   bottom: 0;
+}
+
+/* Open = X icon */
+.sidebar-toggle.is-open .hb-bars::before {
+  top: 5px;
+  box-shadow: none;
+  transform: rotate(45deg);
+}
+
+.sidebar-toggle.is-open .hb-bars::after {
+  top: 5px;
+  bottom: auto;
+  transform: rotate(-45deg);
 }
 
 .app-shell {
