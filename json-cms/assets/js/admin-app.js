@@ -17,9 +17,27 @@
   };
 
   const THEME_KEY = "cs-theme";
+  const SESSION_KEY = "cs-session";
   const DRAFT_PREFIX = "cs-draft:";
   const AUTOSAVE_MS = 8000;
   const $ = (sel) => document.querySelector(sel);
+
+  function setSessionHint(on) {
+    try {
+      if (on) localStorage.setItem(SESSION_KEY, "1");
+      else localStorage.removeItem(SESSION_KEY);
+    } catch (_) {}
+    document.documentElement.classList.toggle("expect-session", !!on);
+  }
+
+  function endBoot() {
+    document.documentElement.classList.remove("is-booting");
+    const boot = $("#boot-screen");
+    if (boot) {
+      boot.hidden = true;
+      boot.setAttribute("aria-busy", "false");
+    }
+  }
 
   function draftLocalKey(name) {
     return DRAFT_PREFIX + name;
@@ -328,6 +346,7 @@
   };
 
   function showLogin() {
+    setSessionHint(false);
     $("#login-view").hidden = false;
     const setup = $("#setup-view");
     if (setup) setup.hidden = true;
@@ -336,9 +355,11 @@
     if (floatToggle) floatToggle.hidden = false;
     const saveBar = $("#save-bar");
     if (saveBar) saveBar.hidden = true;
+    endBoot();
   }
 
   function showApp() {
+    setSessionHint(true);
     $("#login-view").hidden = true;
     const setup = $("#setup-view");
     if (setup) setup.hidden = true;
@@ -347,6 +368,7 @@
     const floatToggle = document.querySelector(".theme-toggle-float");
     if (floatToggle) floatToggle.hidden = true;
     setStudioSection(state.studioSection || "content");
+    endBoot();
   }
 
   function setStudioSection(section) {
@@ -693,6 +715,7 @@
   }
 
   function showSetup() {
+    setSessionHint(true);
     $("#login-view").hidden = true;
     $("#app-view").hidden = true;
     const setup = $("#setup-view");
@@ -702,6 +725,7 @@
     const saveBar = $("#save-bar");
     if (saveBar) saveBar.hidden = true;
     goSetupStep(1);
+    endBoot();
   }
 
   function goSetupStep(step) {
@@ -938,11 +962,18 @@
   }
 
   async function checkAuth() {
+    const bootTitle = $("#boot-title");
+    const bootSub = $("#boot-sub");
+    const expecting = document.documentElement.classList.contains("expect-session");
+    if (bootTitle) bootTitle.textContent = expecting ? "Welcome back" : "Starting CorePanel";
+    if (bootSub) bootSub.textContent = expecting ? "Restoring your secure session…" : "Checking your secure session…";
     try {
       const me = await api("/api/me");
       state.user = me.user;
+      setSessionHint(true);
       await afterAuth();
     } catch {
+      setSessionHint(false);
       showLogin();
     }
   }
@@ -1413,6 +1444,7 @@
         body: JSON.stringify({ username, password }),
       });
       state.user = res.user;
+      setSessionHint(true);
       try {
         await afterAuth();
       } catch (listErr) {
@@ -1420,6 +1452,7 @@
         toast(listErr.message || "Could not load files", "error");
       }
     } catch (err) {
+      setSessionHint(false);
       showLogin();
       $("#login-error").textContent = err.message;
       $("#login-error").hidden = false;
@@ -1448,6 +1481,7 @@
     state.dirty = false;
     $("#editor-panel").hidden = true;
     $("#editor-empty").hidden = false;
+    setSessionHint(false);
     showLogin();
   });
 

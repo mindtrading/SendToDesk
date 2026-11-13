@@ -19,21 +19,44 @@
       } catch (e) {
         document.documentElement.setAttribute("data-theme", "light");
       }
+      try {
+        if (localStorage.getItem("cs-session") === "1") {
+          document.documentElement.classList.add("expect-session");
+        }
+      } catch (e) {}
+      document.documentElement.classList.add("is-booting");
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/css/suneditor.min.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=36" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=37" />
 </head>
 <body>
-  <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme">
+  <div id="boot-screen" class="boot-screen" aria-live="polite" aria-busy="true">
+    <div class="boot-card">
+      <div class="boot-chrome" aria-hidden="true">
+        <span class="login-dot login-dot-red"></span>
+        <span class="login-dot login-dot-amber"></span>
+        <span class="login-dot login-dot-green"></span>
+        <code class="boot-path">~/corepanel · boot</code>
+      </div>
+      <div class="boot-body">
+        <div class="boot-spinner" aria-hidden="true"></div>
+        <p class="boot-kicker"><span>//</span> session</p>
+        <p class="boot-title" id="boot-title">Starting CorePanel</p>
+        <p class="boot-sub" id="boot-sub">Checking your secure session…</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="theme-toggle theme-toggle-float" role="group" aria-label="Theme" hidden>
     <button type="button" data-theme-set="light" id="theme-light-login">Light</button>
     <button type="button" data-theme-set="dark" id="theme-dark-login">Dark</button>
   </div>
 
-  <div id="login-view" class="login-view">
+  <div id="login-view" class="login-view" hidden>
     <div class="login-stack">
       <form id="login-form" class="login-card" autocomplete="on">
         <div class="login-chrome" aria-hidden="true">
@@ -421,6 +444,6 @@
   <script src="https://cdn.jsdelivr.net/npm/suneditor@2.47.0/dist/suneditor.min.js"></script>
   <script src="assets/js/templates.js?v=1"></script>
   <script src="assets/js/form-engine.js?v=14"></script>
-  <script src="assets/js/admin-app.js?v=27"></script>
+  <script src="assets/js/admin-app.js?v=28"></script>
 </body>
 </html>

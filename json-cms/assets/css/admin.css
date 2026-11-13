@@ -136,6 +136,100 @@ a {
   z-index: 40;
 }
 
+.boot-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px),
+    radial-gradient(900px 420px at 12% 8%, var(--accent-soft), transparent 55%);
+  background-size: 28px 28px, 28px 28px, auto;
+}
+
+html:not(.is-booting) .boot-screen {
+  display: none !important;
+}
+
+html.is-booting #login-view,
+html.is-booting #app-view,
+html.is-booting #setup-view,
+html.is-booting .theme-toggle-float {
+  display: none !important;
+}
+
+.boot-card {
+  width: min(380px, 100%);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bg-elev) 94%, transparent);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+}
+
+.boot-chrome {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-panel);
+}
+
+.boot-path {
+  margin-left: 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.boot-body {
+  padding: 28px 24px 26px;
+  text-align: left;
+}
+
+.boot-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--accent);
+  margin-bottom: 16px;
+  animation: boot-spin 0.8s linear infinite;
+}
+
+@keyframes boot-spin {
+  to { transform: rotate(360deg); }
+}
+
+.boot-kicker {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.boot-kicker span {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.boot-title {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.boot-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .login-view {
   min-height: 100vh;
   display: grid;
